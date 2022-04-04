@@ -3,8 +3,6 @@ Imports System.Threading
 
 Module Program
 
-    Private Const MAX_ITEMS As Integer = 47
-
     Private Function PrintLegend(app As SampleApp, startIndex As Integer, selectedIndex As Integer, maxItems As Integer, supportsStreaming As Boolean)
 
         Console.WriteLine("VB GAME LOOP CHROMA SAMPLE APP")
@@ -31,26 +29,18 @@ Module Program
             Console.WriteLine(String.Format("Stream Focus: {0}", app.GetStreamFocus()))
             Console.WriteLine()
 
-            For index As Integer = startIndex To maxItems Step 1
+            For index As Integer = startIndex To 0 Step 1
                 If index.Equals(selectedIndex) Then
                     Console.Write("[*] ")
                 Else
                     Console.Write("[ ] ")
                 End If
                 Console.Write("{0, 8}", app.GetEffectName(index))
-
-                If index > 0 Then
-                    If (index Mod 4).Equals(0) Then
-                        Console.WriteLine()
-                    Else
-                        Console.Write(ControlChars.Tab + ControlChars.Tab)
-                    End If
-                End If
-
-                Console.WriteLine()
-                Console.WriteLine()
-                Console.WriteLine("Press ENTER to execute selection.")
             Next
+
+            Console.WriteLine()
+            Console.WriteLine()
+            Console.WriteLine("Press ENTER to execute selection.")
         End If
         Return Nothing
     End Function
