@@ -3,11 +3,14 @@ Imports System.Threading
 
 Module Program
 
-    Private Function PrintLegend(app As SampleApp, startIndex As Integer, selectedIndex As Integer, maxItems As Integer, supportsStreaming As Boolean)
+    Private Function PrintLegend(app As SampleApp, startIndex As Integer, selectedIndex As Integer, maxItems As Integer, supportsStreaming As Boolean, platform As Byte)
 
         Console.WriteLine("VB GAME LOOP CHROMA SAMPLE APP")
         Console.WriteLine()
-        Console.WriteLine("Press `ESC` to Quit.")
+        Console.WriteLine("Use `ESC` to QUIT.")
+        If (supportsStreaming) Then
+            Console.WriteLine("Press `P` to switch streaming platforms.")
+        End If
         Console.WriteLine("Press `A` for ammo/health.")
         Console.WriteLine("Press `F` for fire.")
         Console.WriteLine("Press `H` to toggle hotkeys.")
@@ -35,7 +38,7 @@ Module Program
                 Else
                     Console.Write("[ ] ")
                 End If
-                Console.Write("{0, 8}", app.GetEffectName(index))
+                Console.Write("{0, 8}", app.GetEffectName(index, platform))
             Next
 
             Console.WriteLine()
@@ -58,6 +61,8 @@ Module Program
 
             Dim selectedIndex As Integer = START_INDEX
 
+            Dim platform As Byte = 0
+
             Dim inputTimer As DateTime = DateTime.MinValue
 
             Dim ts As ThreadStart = New ThreadStart(AddressOf sampleApp.GameLoop)
@@ -66,7 +71,7 @@ Module Program
             While (True)
                 If inputTimer < DateTime.Now Then
                     Console.Clear()
-                    PrintLegend(sampleApp, START_INDEX, selectedIndex, MAX_ITEMS, supportsStreaming)
+                    PrintLegend(sampleApp, START_INDEX, selectedIndex, MAX_ITEMS, supportsStreaming, platform)
                     inputTimer = DateTime.Now + TimeSpan.FromMilliseconds(100)
                 End If
                 Dim keyInfo As ConsoleKeyInfo = Console.ReadKey()
@@ -83,8 +88,10 @@ Module Program
                     End If
                 ElseIf keyInfo.Key.Equals(ConsoleKey.Escape) Then
                     Exit While
+                ElseIf keyInfo.Key.Equals(ConsoleKey.P) Then
+                    platform = (platform + 1) Mod 4 REM PC, AMAZON LUNA, MS GAME PASS, NVIDIA GFN
                 ElseIf keyInfo.Key.Equals(ConsoleKey.Enter) Then
-                    sampleApp.ExecuteItem(selectedIndex, supportsStreaming)
+                    sampleApp.ExecuteItem(selectedIndex, supportsStreaming, platform)
                 End If
                 Thread.Sleep(1)
 
