@@ -9,6 +9,11 @@
 * [Quick Start](#quick-start)
 * [See Also](#see-also)
 * [About](#about)
+* [Chroma Editor Library](#chroma-editor-library)
+* [Windows PC](#windows-pc)
+* [Windows Cloud](#windows-cloud)
+* [API Class](#api-class)
+* [Initialization](#initialization)
 * [API](#api)
 
 <a name="see-also"></a>
@@ -43,7 +48,101 @@ The `VB Chroma Game Loop Sample App` is a sample project that dynamically sets c
 
 ![image_1](/images/image_1.png)
 
+---
+
+<a name="chroma-editor-library"></a>
+
+## Chroma Editor Library
+
+The `Chroma Editor Library` is a helper library for Chroma animation playback and realtime manipulation of Chroma animations.
+
+The latest versions of the `Chroma Editor Library` can be found in [Releases](https://github.com/razerofficial/CChromaEditor/releases) for `Windows-PC` and `Windows-Cloud`.
+
+<a name="windows-pc"></a>
+
+## Windows PC
+
+For `Windows PC` builds the `RzChromaSDK.dll` and `RzChromaStreamPlugin.dll` are not packaged with the build. These libraries are automatically updated and managed by Synapse and the Chroma Connect module. Avoid including these files in your build folder for `Windows PC` builds.
+
+**32-bit libraries**
+
+```
+Win32BuildFolder\CChromaEditorLibrary.dll
+```
+
+**64-bit libraries**
+
+```
+Win64BuildFolder\CChromaEditorLibrary64.dll
+```
+
+<a name="windows-cloud"></a>
+
+## Windows Cloud
+
+`Windows Cloud` builds run on cloud platforms using `Windows` such as `Amazon Luna`, `Microsoft Game Pass`, and `NVidia GeForce Now`. Game instances run in the cloud without direct access to Chroma hardware. By running the `Windows Cloud` version of the library `Chroma` effects can reach your local machine and connected hardware. Cloud instances won't have Synapse installed which requires special cloud versions of the libraries. The `Chroma Editor Library` uses the core `RzChromaSDK` low-level library to send Chroma effects to the cloud with the `RzChromaStreamPlugin` streaming library. Viewers can watch the cloud stream via the [Razer Stream Portal](https://stream.razer.com/).
+
+**32-bit libraries**
+
+```
+Win32BuildFolder\CChromaEditorLibrary.dll
+Win32BuildFolder\RzChromaSDK.dll
+Win32BuildFolder\RzChromaStreamPlugin.dll
+```
+
+**64-bit libraries**
+
+```
+Win64BuildFolder\CChromaEditorLibrary64.dll
+Win64BuildFolder\RzChromaSDK64.dll
+Win64BuildFolder\RzChromaStreamPlugin64.dll
+```
+
+<a name="api-class"></a>
+
+## API Class
+
+The `ChromaAnimationAPI` module provides a wrapper for the Chroma Editor Library. The wrapper for the API can be found at [ChromaAnimationAPI.vb](ChromaAnimationAPI.vb).
+
+<a name="initialization"></a>
+
+## Initialization
+
+---
+
+The `ChromaAnimationAPI.InitSDK(appInfo)` method returns `RazerErrors.RZRESULT_SUCCESS` when initialization has succeeded. Avoid making calls to the Chroma API when anything other than success is returned. A unsuccessful result indicates `Chroma` is not present on the machine.
+
+```
+  Dim appInfo As ChromaSDK.APPINFOTYPE = New APPINFOTYPE()
+
+  appInfo.Title = "Sample Game Title";
+  appInfo.Description = "Sample Game Description";
+  appInfo.Author_Name = "Company Name";
+  appInfo.Author_Contact = "Company Website or Email";
+
+  //    &H1 |  // Keyboards
+  //    &H2 |  // Mice
+  //    &H4 |  // Headset
+  //    &H8 |  // Mousepads
+  //    &H10 | // Keypads
+  //    &H20   // ChromaLink devices
+  appInfo.SupportedDevice = (&H1 Xor &H2 Xor &H4 Xor &H8 Xor &H10 Xor &H20)
+  //    &H1 | // Utility. (To specifiy this is an utility application)
+  //    &H2   // Game. (To specifiy this is a game);
+  appInfo.Category = &H2;
+  
+  Dim result As Integer = ChromaAnimationAPI.InitSDK(appInfo);
+  if (result <> RazerErrors.RZRESULT_SUCCESS)
+  {
+    Console.Error.WriteLine("Failed to initialize Chroma SDK with error={0}\r\n", result);
+
+    // avoid making Chroma API calls after a non-zero init result
+    return;
+  }
+```
+
 <a name="api"></a>
+
 ## API
 
 * [AddColor](#AddColor)
@@ -578,6 +677,7 @@ The `VB Chroma Game Loop Sample App` is a sample project that dynamically sets c
 * [UseIdleAnimations](#UseIdleAnimations)
 * [UsePreloading](#UsePreloading)
 * [UsePreloadingName](#UsePreloadingName)
+
 ---
 
 <a name="AddColor"></a>
@@ -594,11 +694,11 @@ Dim result As Integer = ChromaAnimationAPI.AddColor(color1 As Integer, color2 As
 <a name="AddFrame"></a>
 **AddFrame**
 
-Adds a frame to the `Chroma` animation and sets the `duration` (in seconds). 
-The `color` is expected to be an array of the dimensions for the `deviceType/device`. 
-The `length` parameter is the size of the `color` array. For `EChromaSDKDevice1DEnum` 
-the array size should be `MAX LEDS`. For `EChromaSDKDevice2DEnum` the array 
-size should be `MAX ROW` * `MAX COLUMN`. Returns the animation id upon 
+Adds a frame to the `Chroma` animation and sets the `duration` (in seconds).
+The `color` is expected to be an array of the dimensions for the `deviceType/device`.
+The `length` parameter is the size of the `color` array. For `EChromaSDKDevice1DEnum`
+the array size should be `MAX LEDS`. For `EChromaSDKDevice2DEnum` the array
+size should be `MAX ROW` * `MAX COLUMN`. Returns the animation id upon
 success. Returns -1 upon failure.
 
 ```vb
@@ -610,7 +710,7 @@ Dim result As Integer = ChromaAnimationAPI.AddFrame(animationId As Integer, dura
 <a name="AddNonZeroAllKeysAllFrames"></a>
 **AddNonZeroAllKeysAllFrames**
 
-Add source color to target where color is not black for all frames, reference 
+Add source color to target where color is not black for all frames, reference
 source and target by id.
 
 ```vb
@@ -622,7 +722,7 @@ ChromaAnimationAPI.AddNonZeroAllKeysAllFrames(sourceAnimationId As Integer, targ
 <a name="AddNonZeroAllKeysAllFramesName"></a>
 **AddNonZeroAllKeysAllFramesName**
 
-Add source color to target where color is not black for all frames, reference 
+Add source color to target where color is not black for all frames, reference
 source and target by name.
 
 ```vb
@@ -645,8 +745,8 @@ Dim result As Double = ChromaAnimationAPI.AddNonZeroAllKeysAllFramesNameD(source
 <a name="AddNonZeroAllKeysAllFramesOffset"></a>
 **AddNonZeroAllKeysAllFramesOffset**
 
-Add source color to target where color is not black for all frames starting 
-at offset for the length of the source, reference source and target by 
+Add source color to target where color is not black for all frames starting
+at offset for the length of the source, reference source and target by
 id.
 
 ```vb
@@ -658,8 +758,8 @@ ChromaAnimationAPI.AddNonZeroAllKeysAllFramesOffset(sourceAnimationId As Integer
 <a name="AddNonZeroAllKeysAllFramesOffsetName"></a>
 **AddNonZeroAllKeysAllFramesOffsetName**
 
-Add source color to target where color is not black for all frames starting 
-at offset for the length of the source, reference source and target by 
+Add source color to target where color is not black for all frames starting
+at offset for the length of the source, reference source and target by
 name.
 
 ```vb
@@ -682,7 +782,7 @@ Dim result As Double = ChromaAnimationAPI.AddNonZeroAllKeysAllFramesOffsetNameD(
 <a name="AddNonZeroAllKeysOffset"></a>
 **AddNonZeroAllKeysOffset**
 
-Add source color to target where color is not black for the source frame 
+Add source color to target where color is not black for the source frame
 and target offset frame, reference source and target by id.
 
 ```vb
@@ -694,7 +794,7 @@ ChromaAnimationAPI.AddNonZeroAllKeysOffset(sourceAnimationId As Integer, targetA
 <a name="AddNonZeroAllKeysOffsetName"></a>
 **AddNonZeroAllKeysOffsetName**
 
-Add source color to target where color is not black for the source frame 
+Add source color to target where color is not black for the source frame
 and target offset frame, reference source and target by name.
 
 ```vb
@@ -717,7 +817,7 @@ Dim result As Double = ChromaAnimationAPI.AddNonZeroAllKeysOffsetNameD(sourceAni
 <a name="AddNonZeroTargetAllKeysAllFrames"></a>
 **AddNonZeroTargetAllKeysAllFrames**
 
-Add source color to target where the target color is not black for all frames, 
+Add source color to target where the target color is not black for all frames,
 reference source and target by id.
 
 ```vb
@@ -729,7 +829,7 @@ ChromaAnimationAPI.AddNonZeroTargetAllKeysAllFrames(sourceAnimationId As Integer
 <a name="AddNonZeroTargetAllKeysAllFramesName"></a>
 **AddNonZeroTargetAllKeysAllFramesName**
 
-Add source color to target where the target color is not black for all frames, 
+Add source color to target where the target color is not black for all frames,
 reference source and target by name.
 
 ```vb
@@ -752,8 +852,8 @@ Dim result As Double = ChromaAnimationAPI.AddNonZeroTargetAllKeysAllFramesNameD(
 <a name="AddNonZeroTargetAllKeysAllFramesOffset"></a>
 **AddNonZeroTargetAllKeysAllFramesOffset**
 
-Add source color to target where the target color is not black for all frames 
-starting at offset for the length of the source, reference source and target 
+Add source color to target where the target color is not black for all frames
+starting at offset for the length of the source, reference source and target
 by id.
 
 ```vb
@@ -765,8 +865,8 @@ ChromaAnimationAPI.AddNonZeroTargetAllKeysAllFramesOffset(sourceAnimationId As I
 <a name="AddNonZeroTargetAllKeysAllFramesOffsetName"></a>
 **AddNonZeroTargetAllKeysAllFramesOffsetName**
 
-Add source color to target where the target color is not black for all frames 
-starting at offset for the length of the source, reference source and target 
+Add source color to target where the target color is not black for all frames
+starting at offset for the length of the source, reference source and target
 by name.
 
 ```vb
@@ -789,7 +889,7 @@ Dim result As Double = ChromaAnimationAPI.AddNonZeroTargetAllKeysAllFramesOffset
 <a name="AddNonZeroTargetAllKeysOffset"></a>
 **AddNonZeroTargetAllKeysOffset**
 
-Add source color to target where target color is not blank from the source 
+Add source color to target where target color is not blank from the source
 frame to the target offset frame, reference source and target by id.
 
 ```vb
@@ -801,7 +901,7 @@ ChromaAnimationAPI.AddNonZeroTargetAllKeysOffset(sourceAnimationId As Integer, t
 <a name="AddNonZeroTargetAllKeysOffsetName"></a>
 **AddNonZeroTargetAllKeysOffsetName**
 
-Add source color to target where target color is not blank from the source 
+Add source color to target where target color is not blank from the source
 frame to the target offset frame, reference source and target by name.
 
 ```vb
@@ -824,7 +924,7 @@ Dim result As Double = ChromaAnimationAPI.AddNonZeroTargetAllKeysOffsetNameD(sou
 <a name="AppendAllFrames"></a>
 **AppendAllFrames**
 
-Append all source frames to the target animation, reference source and target 
+Append all source frames to the target animation, reference source and target
 by id.
 
 ```vb
@@ -836,7 +936,7 @@ ChromaAnimationAPI.AppendAllFrames(sourceAnimationId As Integer, targetAnimation
 <a name="AppendAllFramesName"></a>
 **AppendAllFramesName**
 
-Append all source frames to the target animation, reference source and target 
+Append all source frames to the target animation, reference source and target
 by name.
 
 ```vb
@@ -881,7 +981,7 @@ ChromaAnimationAPI.ClearAnimationType(deviceType As Integer, device As Integer)
 <a name="CloseAll"></a>
 **CloseAll**
 
-`PluginCloseAll` closes all open animations so they can be reloaded from 
+`PluginCloseAll` closes all open animations so they can be reloaded from
 disk. The set of animations will be stopped if playing.
 
 ```vb
@@ -893,9 +993,9 @@ ChromaAnimationAPI.CloseAll()
 <a name="CloseAnimation"></a>
 **CloseAnimation**
 
-Closes the `Chroma` animation to free up resources referenced by id. Returns 
-the animation id upon success. Returns -1 upon failure. This might be used 
-while authoring effects if there was a change necessitating re-opening 
+Closes the `Chroma` animation to free up resources referenced by id. Returns
+the animation id upon success. Returns -1 upon failure. This might be used
+while authoring effects if there was a change necessitating re-opening
 the animation. The animation id can no longer be used once closed.
 
 ```vb
@@ -918,7 +1018,7 @@ Dim result As Double = ChromaAnimationAPI.CloseAnimationD(animationId As Double)
 <a name="CloseAnimationName"></a>
 **CloseAnimationName**
 
-Closes the `Chroma` animation referenced by name so that the animation can 
+Closes the `Chroma` animation referenced by name so that the animation can
 be reloaded from disk.
 
 ```vb
@@ -941,7 +1041,7 @@ Dim result As Double = ChromaAnimationAPI.CloseAnimationNameD(path As String)
 <a name="CloseComposite"></a>
 **CloseComposite**
 
-`PluginCloseComposite` closes a set of animations so they can be reloaded 
+`PluginCloseComposite` closes a set of animations so they can be reloaded
 from disk. The set of animations will be stopped if playing.
 
 ```vb
@@ -964,7 +1064,7 @@ Dim result As Double = ChromaAnimationAPI.CloseCompositeD(name As String)
 <a name="CopyAllKeys"></a>
 **CopyAllKeys**
 
-Copy source animation to target animation for the given frame. Source and 
+Copy source animation to target animation for the given frame. Source and
 target are referenced by id.
 
 ```vb
@@ -976,7 +1076,7 @@ ChromaAnimationAPI.CopyAllKeys(sourceAnimationId As Integer, targetAnimationId A
 <a name="CopyAllKeysName"></a>
 **CopyAllKeysName**
 
-Copy source animation to target animation for the given frame. Source and 
+Copy source animation to target animation for the given frame. Source and
 target are referenced by id.
 
 ```vb
@@ -988,7 +1088,7 @@ ChromaAnimationAPI.CopyAllKeysName(sourceAnimation As String, targetAnimation As
 <a name="CopyAnimation"></a>
 **CopyAnimation**
 
-Copy animation to named target animation in memory. If target animation 
+Copy animation to named target animation in memory. If target animation
 exists, close first. Source is referenced by id.
 
 ```vb
@@ -1000,7 +1100,7 @@ Dim result As Integer = ChromaAnimationAPI.CopyAnimation(sourceAnimationId As In
 <a name="CopyAnimationName"></a>
 **CopyAnimationName**
 
-Copy animation to named target animation in memory. If target animation 
+Copy animation to named target animation in memory. If target animation
 exists, close first. Source is referenced by name.
 
 ```vb
@@ -1023,7 +1123,7 @@ Dim result As Double = ChromaAnimationAPI.CopyAnimationNameD(sourceAnimation As 
 <a name="CopyBlueChannelAllFrames"></a>
 **CopyBlueChannelAllFrames**
 
-Copy blue channel to other channels for all frames. Intensity range is 0.0 
+Copy blue channel to other channels for all frames. Intensity range is 0.0
 to 1.0. Reference the animation by id.
 
 ```vb
@@ -1035,7 +1135,7 @@ ChromaAnimationAPI.CopyBlueChannelAllFrames(animationId As Integer, redIntensity
 <a name="CopyBlueChannelAllFramesName"></a>
 **CopyBlueChannelAllFramesName**
 
-Copy blue channel to other channels for all frames. Intensity range is 0.0 
+Copy blue channel to other channels for all frames. Intensity range is 0.0
 to 1.0. Reference the animation by name.
 
 ```vb
@@ -1058,7 +1158,7 @@ Dim result As Double = ChromaAnimationAPI.CopyBlueChannelAllFramesNameD(path As 
 <a name="CopyGreenChannelAllFrames"></a>
 **CopyGreenChannelAllFrames**
 
-Copy green channel to other channels for all frames. Intensity range is 
+Copy green channel to other channels for all frames. Intensity range is
 0.0 to 1.0. Reference the animation by id.
 
 ```vb
@@ -1070,7 +1170,7 @@ ChromaAnimationAPI.CopyGreenChannelAllFrames(animationId As Integer, redIntensit
 <a name="CopyGreenChannelAllFramesName"></a>
 **CopyGreenChannelAllFramesName**
 
-Copy green channel to other channels for all frames. Intensity range is 
+Copy green channel to other channels for all frames. Intensity range is
 0.0 to 1.0. Reference the animation by name.
 
 ```vb
@@ -1093,7 +1193,7 @@ Dim result As Double = ChromaAnimationAPI.CopyGreenChannelAllFramesNameD(path As
 <a name="CopyKeyColor"></a>
 **CopyKeyColor**
 
-Copy animation key color from the source animation to the target animation 
+Copy animation key color from the source animation to the target animation
 for the given frame. Reference the source and target by id.
 
 ```vb
@@ -1105,7 +1205,7 @@ ChromaAnimationAPI.CopyKeyColor(sourceAnimationId As Integer, targetAnimationId 
 <a name="CopyKeyColorAllFrames"></a>
 **CopyKeyColorAllFrames**
 
-Copy animation key color from the source animation to the target animation 
+Copy animation key color from the source animation to the target animation
 for all frames. Reference the source and target by id.
 
 ```vb
@@ -1117,7 +1217,7 @@ ChromaAnimationAPI.CopyKeyColorAllFrames(sourceAnimationId As Integer, targetAni
 <a name="CopyKeyColorAllFramesName"></a>
 **CopyKeyColorAllFramesName**
 
-Copy animation key color from the source animation to the target animation 
+Copy animation key color from the source animation to the target animation
 for all frames. Reference the source and target by name.
 
 ```vb
@@ -1140,8 +1240,8 @@ Dim result As Double = ChromaAnimationAPI.CopyKeyColorAllFramesNameD(sourceAnima
 <a name="CopyKeyColorAllFramesOffset"></a>
 **CopyKeyColorAllFramesOffset**
 
-Copy animation key color from the source animation to the target animation 
-for all frames, starting at the offset for the length of the source animation. 
+Copy animation key color from the source animation to the target animation
+for all frames, starting at the offset for the length of the source animation.
 Source and target are referenced by id.
 
 ```vb
@@ -1153,8 +1253,8 @@ ChromaAnimationAPI.CopyKeyColorAllFramesOffset(sourceAnimationId As Integer, tar
 <a name="CopyKeyColorAllFramesOffsetName"></a>
 **CopyKeyColorAllFramesOffsetName**
 
-Copy animation key color from the source animation to the target animation 
-for all frames, starting at the offset for the length of the source animation. 
+Copy animation key color from the source animation to the target animation
+for all frames, starting at the offset for the length of the source animation.
 Source and target are referenced by name.
 
 ```vb
@@ -1177,7 +1277,7 @@ Dim result As Double = ChromaAnimationAPI.CopyKeyColorAllFramesOffsetNameD(sourc
 <a name="CopyKeyColorName"></a>
 **CopyKeyColorName**
 
-Copy animation key color from the source animation to the target animation 
+Copy animation key color from the source animation to the target animation
 for the given frame.
 
 ```vb
@@ -1200,8 +1300,8 @@ Dim result As Double = ChromaAnimationAPI.CopyKeyColorNameD(sourceAnimation As S
 <a name="CopyKeysColor"></a>
 **CopyKeysColor**
 
-Copy animation color for a set of keys from the source animation to the 
-target animation for the given frame. Reference the source and target by 
+Copy animation color for a set of keys from the source animation to the
+target animation for the given frame. Reference the source and target by
 id.
 
 ```vb
@@ -1213,7 +1313,7 @@ ChromaAnimationAPI.CopyKeysColor(sourceAnimationId As Integer, targetAnimationId
 <a name="CopyKeysColorAllFrames"></a>
 **CopyKeysColorAllFrames**
 
-Copy animation color for a set of keys from the source animation to the 
+Copy animation color for a set of keys from the source animation to the
 target animation for all frames. Reference the source and target by id.
 
 ```vb
@@ -1225,7 +1325,7 @@ ChromaAnimationAPI.CopyKeysColorAllFrames(sourceAnimationId As Integer, targetAn
 <a name="CopyKeysColorAllFramesName"></a>
 **CopyKeysColorAllFramesName**
 
-Copy animation color for a set of keys from the source animation to the 
+Copy animation color for a set of keys from the source animation to the
 target animation for all frames. Reference the source and target by name.
 
 ```vb
@@ -1237,8 +1337,8 @@ ChromaAnimationAPI.CopyKeysColorAllFramesName(sourceAnimation As String, targetA
 <a name="CopyKeysColorName"></a>
 **CopyKeysColorName**
 
-Copy animation color for a set of keys from the source animation to the 
-target animation for the given frame. Reference the source and target by 
+Copy animation color for a set of keys from the source animation to the
+target animation for the given frame. Reference the source and target by
 name.
 
 ```vb
@@ -1250,8 +1350,8 @@ ChromaAnimationAPI.CopyKeysColorName(sourceAnimation As String, targetAnimation 
 <a name="CopyKeysColorOffset"></a>
 **CopyKeysColorOffset**
 
-Copy animation color for a set of keys from the source animation to the 
-target animation from the source frame to the target frame. Reference the 
+Copy animation color for a set of keys from the source animation to the
+target animation from the source frame to the target frame. Reference the
 source and target by id.
 
 ```vb
@@ -1263,8 +1363,8 @@ ChromaAnimationAPI.CopyKeysColorOffset(sourceAnimationId As Integer, targetAnima
 <a name="CopyKeysColorOffsetName"></a>
 **CopyKeysColorOffsetName**
 
-Copy animation color for a set of keys from the source animation to the 
-target animation from the source frame to the target frame. Reference the 
+Copy animation color for a set of keys from the source animation to the
+target animation from the source frame to the target frame. Reference the
 source and target by name.
 
 ```vb
@@ -1276,7 +1376,7 @@ ChromaAnimationAPI.CopyKeysColorOffsetName(sourceAnimation As String, targetAnim
 <a name="CopyNonZeroAllKeys"></a>
 **CopyNonZeroAllKeys**
 
-Copy source animation to target animation for the given frame. Source and 
+Copy source animation to target animation for the given frame. Source and
 target are referenced by id.
 
 ```vb
@@ -1288,7 +1388,7 @@ ChromaAnimationAPI.CopyNonZeroAllKeys(sourceAnimationId As Integer, targetAnimat
 <a name="CopyNonZeroAllKeysAllFrames"></a>
 **CopyNonZeroAllKeysAllFrames**
 
-Copy nonzero colors from a source animation to a target animation for all 
+Copy nonzero colors from a source animation to a target animation for all
 frames. Reference source and target by id.
 
 ```vb
@@ -1300,7 +1400,7 @@ ChromaAnimationAPI.CopyNonZeroAllKeysAllFrames(sourceAnimationId As Integer, tar
 <a name="CopyNonZeroAllKeysAllFramesName"></a>
 **CopyNonZeroAllKeysAllFramesName**
 
-Copy nonzero colors from a source animation to a target animation for all 
+Copy nonzero colors from a source animation to a target animation for all
 frames. Reference source and target by name.
 
 ```vb
@@ -1323,8 +1423,8 @@ Dim result As Double = ChromaAnimationAPI.CopyNonZeroAllKeysAllFramesNameD(sourc
 <a name="CopyNonZeroAllKeysAllFramesOffset"></a>
 **CopyNonZeroAllKeysAllFramesOffset**
 
-Copy nonzero colors from a source animation to a target animation for all 
-frames starting at the offset for the length of the source animation. The 
+Copy nonzero colors from a source animation to a target animation for all
+frames starting at the offset for the length of the source animation. The
 source and target are referenced by id.
 
 ```vb
@@ -1336,8 +1436,8 @@ ChromaAnimationAPI.CopyNonZeroAllKeysAllFramesOffset(sourceAnimationId As Intege
 <a name="CopyNonZeroAllKeysAllFramesOffsetName"></a>
 **CopyNonZeroAllKeysAllFramesOffsetName**
 
-Copy nonzero colors from a source animation to a target animation for all 
-frames starting at the offset for the length of the source animation. The 
+Copy nonzero colors from a source animation to a target animation for all
+frames starting at the offset for the length of the source animation. The
 source and target are referenced by name.
 
 ```vb
@@ -1360,7 +1460,7 @@ Dim result As Double = ChromaAnimationAPI.CopyNonZeroAllKeysAllFramesOffsetNameD
 <a name="CopyNonZeroAllKeysName"></a>
 **CopyNonZeroAllKeysName**
 
-Copy nonzero colors from source animation to target animation for the specified 
+Copy nonzero colors from source animation to target animation for the specified
 frame. Source and target are referenced by id.
 
 ```vb
@@ -1383,8 +1483,8 @@ Dim result As Double = ChromaAnimationAPI.CopyNonZeroAllKeysNameD(sourceAnimatio
 <a name="CopyNonZeroAllKeysOffset"></a>
 **CopyNonZeroAllKeysOffset**
 
-Copy nonzero colors from the source animation to the target animation from 
-the source frame to the target offset frame. Source and target are referenced 
+Copy nonzero colors from the source animation to the target animation from
+the source frame to the target offset frame. Source and target are referenced
 by id.
 
 ```vb
@@ -1396,8 +1496,8 @@ ChromaAnimationAPI.CopyNonZeroAllKeysOffset(sourceAnimationId As Integer, target
 <a name="CopyNonZeroAllKeysOffsetName"></a>
 **CopyNonZeroAllKeysOffsetName**
 
-Copy nonzero colors from the source animation to the target animation from 
-the source frame to the target offset frame. Source and target are referenced 
+Copy nonzero colors from the source animation to the target animation from
+the source frame to the target offset frame. Source and target are referenced
 by name.
 
 ```vb
@@ -1420,7 +1520,7 @@ Dim result As Double = ChromaAnimationAPI.CopyNonZeroAllKeysOffsetNameD(sourceAn
 <a name="CopyNonZeroKeyColor"></a>
 **CopyNonZeroKeyColor**
 
-Copy animation key color from the source animation to the target animation 
+Copy animation key color from the source animation to the target animation
 for the given frame where color is not zero.
 
 ```vb
@@ -1432,7 +1532,7 @@ ChromaAnimationAPI.CopyNonZeroKeyColor(sourceAnimationId As Integer, targetAnima
 <a name="CopyNonZeroKeyColorName"></a>
 **CopyNonZeroKeyColorName**
 
-Copy animation key color from the source animation to the target animation 
+Copy animation key color from the source animation to the target animation
 for the given frame where color is not zero.
 
 ```vb
@@ -1455,8 +1555,8 @@ Dim result As Double = ChromaAnimationAPI.CopyNonZeroKeyColorNameD(sourceAnimati
 <a name="CopyNonZeroTargetAllKeys"></a>
 **CopyNonZeroTargetAllKeys**
 
-Copy nonzero colors from the source animation to the target animation where 
-the target color is nonzero for the specified frame. Source and target 
+Copy nonzero colors from the source animation to the target animation where
+the target color is nonzero for the specified frame. Source and target
 are referenced by id.
 
 ```vb
@@ -1468,8 +1568,8 @@ ChromaAnimationAPI.CopyNonZeroTargetAllKeys(sourceAnimationId As Integer, target
 <a name="CopyNonZeroTargetAllKeysAllFrames"></a>
 **CopyNonZeroTargetAllKeysAllFrames**
 
-Copy nonzero colors from the source animation to the target animation where 
-the target color is nonzero for all frames. Source and target are referenced 
+Copy nonzero colors from the source animation to the target animation where
+the target color is nonzero for all frames. Source and target are referenced
 by id.
 
 ```vb
@@ -1481,8 +1581,8 @@ ChromaAnimationAPI.CopyNonZeroTargetAllKeysAllFrames(sourceAnimationId As Intege
 <a name="CopyNonZeroTargetAllKeysAllFramesName"></a>
 **CopyNonZeroTargetAllKeysAllFramesName**
 
-Copy nonzero colors from the source animation to the target animation where 
-the target color is nonzero for all frames. Source and target are referenced 
+Copy nonzero colors from the source animation to the target animation where
+the target color is nonzero for all frames. Source and target are referenced
 by name.
 
 ```vb
@@ -1505,8 +1605,8 @@ Dim result As Double = ChromaAnimationAPI.CopyNonZeroTargetAllKeysAllFramesNameD
 <a name="CopyNonZeroTargetAllKeysAllFramesOffset"></a>
 **CopyNonZeroTargetAllKeysAllFramesOffset**
 
-Copy nonzero colors from the source animation to the target animation where 
-the target color is nonzero for all frames. Source and target are referenced 
+Copy nonzero colors from the source animation to the target animation where
+the target color is nonzero for all frames. Source and target are referenced
 by name.
 
 ```vb
@@ -1518,9 +1618,9 @@ ChromaAnimationAPI.CopyNonZeroTargetAllKeysAllFramesOffset(sourceAnimationId As 
 <a name="CopyNonZeroTargetAllKeysAllFramesOffsetName"></a>
 **CopyNonZeroTargetAllKeysAllFramesOffsetName**
 
-Copy nonzero colors from the source animation to the target animation where 
-the target color is nonzero for all frames starting at the target offset 
-for the length of the source animation. Source and target animations are 
+Copy nonzero colors from the source animation to the target animation where
+the target color is nonzero for all frames starting at the target offset
+for the length of the source animation. Source and target animations are
 referenced by name.
 
 ```vb
@@ -1543,8 +1643,8 @@ Dim result As Double = ChromaAnimationAPI.CopyNonZeroTargetAllKeysAllFramesOffse
 <a name="CopyNonZeroTargetAllKeysName"></a>
 **CopyNonZeroTargetAllKeysName**
 
-Copy nonzero colors from the source animation to the target animation where 
-the target color is nonzero for the specified frame. The source and target 
+Copy nonzero colors from the source animation to the target animation where
+the target color is nonzero for the specified frame. The source and target
 are referenced by name.
 
 ```vb
@@ -1567,8 +1667,8 @@ Dim result As Double = ChromaAnimationAPI.CopyNonZeroTargetAllKeysNameD(sourceAn
 <a name="CopyNonZeroTargetAllKeysOffset"></a>
 **CopyNonZeroTargetAllKeysOffset**
 
-Copy nonzero colors from the source animation to the target animation where 
-the target color is nonzero for the specified source frame and target offset 
+Copy nonzero colors from the source animation to the target animation where
+the target color is nonzero for the specified source frame and target offset
 frame. The source and target are referenced by id.
 
 ```vb
@@ -1580,8 +1680,8 @@ ChromaAnimationAPI.CopyNonZeroTargetAllKeysOffset(sourceAnimationId As Integer, 
 <a name="CopyNonZeroTargetAllKeysOffsetName"></a>
 **CopyNonZeroTargetAllKeysOffsetName**
 
-Copy nonzero colors from the source animation to the target animation where 
-the target color is nonzero for the specified source frame and target offset 
+Copy nonzero colors from the source animation to the target animation where
+the target color is nonzero for the specified source frame and target offset
 frame. The source and target are referenced by name.
 
 ```vb
@@ -1604,8 +1704,8 @@ Dim result As Double = ChromaAnimationAPI.CopyNonZeroTargetAllKeysOffsetNameD(so
 <a name="CopyNonZeroTargetZeroAllKeysAllFrames"></a>
 **CopyNonZeroTargetZeroAllKeysAllFrames**
 
-Copy nonzero colors from the source animation to the target animation where 
-the target color is zero for all frames. Source and target are referenced 
+Copy nonzero colors from the source animation to the target animation where
+the target color is zero for all frames. Source and target are referenced
 by id.
 
 ```vb
@@ -1617,8 +1717,8 @@ ChromaAnimationAPI.CopyNonZeroTargetZeroAllKeysAllFrames(sourceAnimationId As In
 <a name="CopyNonZeroTargetZeroAllKeysAllFramesName"></a>
 **CopyNonZeroTargetZeroAllKeysAllFramesName**
 
-Copy nonzero colors from the source animation to the target animation where 
-the target color is zero for all frames. Source and target are referenced 
+Copy nonzero colors from the source animation to the target animation where
+the target color is zero for all frames. Source and target are referenced
 by name.
 
 ```vb
@@ -1641,7 +1741,7 @@ Dim result As Double = ChromaAnimationAPI.CopyNonZeroTargetZeroAllKeysAllFramesN
 <a name="CopyRedChannelAllFrames"></a>
 **CopyRedChannelAllFrames**
 
-Copy red channel to other channels for all frames. Intensity range is 0.0 
+Copy red channel to other channels for all frames. Intensity range is 0.0
 to 1.0. Reference the animation by id.
 
 ```vb
@@ -1653,7 +1753,7 @@ ChromaAnimationAPI.CopyRedChannelAllFrames(animationId As Integer, greenIntensit
 <a name="CopyRedChannelAllFramesName"></a>
 **CopyRedChannelAllFramesName**
 
-Copy green channel to other channels for all frames. Intensity range is 
+Copy green channel to other channels for all frames. Intensity range is
 0.0 to 1.0. Reference the animation by name.
 
 ```vb
@@ -1676,7 +1776,7 @@ Dim result As Double = ChromaAnimationAPI.CopyRedChannelAllFramesNameD(path As S
 <a name="CopyZeroAllKeysAllFrames"></a>
 **CopyZeroAllKeysAllFrames**
 
-Copy zero colors from source animation to target animation for all frames. 
+Copy zero colors from source animation to target animation for all frames.
 Source and target are referenced by id.
 
 ```vb
@@ -1688,7 +1788,7 @@ ChromaAnimationAPI.CopyZeroAllKeysAllFrames(sourceAnimationId As Integer, target
 <a name="CopyZeroAllKeysAllFramesName"></a>
 **CopyZeroAllKeysAllFramesName**
 
-Copy zero colors from source animation to target animation for all frames. 
+Copy zero colors from source animation to target animation for all frames.
 Source and target are referenced by name.
 
 ```vb
@@ -1711,8 +1811,8 @@ Dim result As Double = ChromaAnimationAPI.CopyZeroAllKeysAllFramesNameD(sourceAn
 <a name="CopyZeroAllKeysAllFramesOffset"></a>
 **CopyZeroAllKeysAllFramesOffset**
 
-Copy zero colors from source animation to target animation for all frames 
-starting at the target offset for the length of the source animation. Source 
+Copy zero colors from source animation to target animation for all frames
+starting at the target offset for the length of the source animation. Source
 and target are referenced by id.
 
 ```vb
@@ -1724,8 +1824,8 @@ ChromaAnimationAPI.CopyZeroAllKeysAllFramesOffset(sourceAnimationId As Integer, 
 <a name="CopyZeroAllKeysAllFramesOffsetName"></a>
 **CopyZeroAllKeysAllFramesOffsetName**
 
-Copy zero colors from source animation to target animation for all frames 
-starting at the target offset for the length of the source animation. Source 
+Copy zero colors from source animation to target animation for all frames
+starting at the target offset for the length of the source animation. Source
 and target are referenced by name.
 
 ```vb
@@ -1748,7 +1848,7 @@ Dim result As Double = ChromaAnimationAPI.CopyZeroAllKeysAllFramesOffsetNameD(so
 <a name="CopyZeroKeyColor"></a>
 **CopyZeroKeyColor**
 
-Copy zero key color from source animation to target animation for the specified 
+Copy zero key color from source animation to target animation for the specified
 frame. Source and target are referenced by id.
 
 ```vb
@@ -1760,7 +1860,7 @@ ChromaAnimationAPI.CopyZeroKeyColor(sourceAnimationId As Integer, targetAnimatio
 <a name="CopyZeroKeyColorName"></a>
 **CopyZeroKeyColorName**
 
-Copy zero key color from source animation to target animation for the specified 
+Copy zero key color from source animation to target animation for the specified
 frame. Source and target are referenced by name.
 
 ```vb
@@ -1783,7 +1883,7 @@ Dim result As Double = ChromaAnimationAPI.CopyZeroKeyColorNameD(sourceAnimation 
 <a name="CopyZeroTargetAllKeysAllFrames"></a>
 **CopyZeroTargetAllKeysAllFrames**
 
-Copy nonzero color from source animation to target animation where target 
+Copy nonzero color from source animation to target animation where target
 is zero for all frames. Source and target are referenced by id.
 
 ```vb
@@ -1795,7 +1895,7 @@ ChromaAnimationAPI.CopyZeroTargetAllKeysAllFrames(sourceAnimationId As Integer, 
 <a name="CopyZeroTargetAllKeysAllFramesName"></a>
 **CopyZeroTargetAllKeysAllFramesName**
 
-Copy nonzero color from source animation to target animation where target 
+Copy nonzero color from source animation to target animation where target
 is zero for all frames. Source and target are referenced by name.
 
 ```vb
@@ -1950,10 +2050,10 @@ Dim result As Integer = ChromaAnimationAPI.CoreSetEffect(effectId As Guid)
 <a name="CoreStreamBroadcast"></a>
 **CoreStreamBroadcast**
 
-Begin broadcasting Chroma RGB data using the stored stream key as the endpoint. 
-Intended for Cloud Gaming Platforms,  restore the streaming key when the 
-game instance is launched to continue streaming.  streamId is a null terminated 
-string  streamKey is a null terminated string  StreamGetStatus() should 
+Begin broadcasting Chroma RGB data using the stored stream key as the endpoint.
+Intended for Cloud Gaming Platforms,  restore the streaming key when the
+game instance is launched to continue streaming.  streamId is a null terminated
+string  streamKey is a null terminated string  StreamGetStatus() should
 return the READY status to use this method.
 
 ```vb
@@ -1965,7 +2065,7 @@ Dim result As Boolean = ChromaAnimationAPI.CoreStreamBroadcast(streamId As Strin
 <a name="CoreStreamBroadcastEnd"></a>
 **CoreStreamBroadcastEnd**
 
-End broadcasting Chroma RGB data.  StreamGetStatus() should return the BROADCASTING 
+End broadcasting Chroma RGB data.  StreamGetStatus() should return the BROADCASTING
 status to use this method.
 
 ```vb
@@ -1977,12 +2077,12 @@ Dim result As Boolean = ChromaAnimationAPI.CoreStreamBroadcastEnd()
 <a name="CoreStreamGetAuthShortcode"></a>
 **CoreStreamGetAuthShortcode**
 
-shortcode: Pass the address of a preallocated character buffer to get the 
-streaming auth code. The buffer should have a minimum length of 6.  length: 
-Length will return as zero if the streaming auth code could not be obtained. 
-If length is greater than zero, it will be the length of the returned streaming 
-auth code.  Once you have the shortcode, it should be shown to the user 
-so they can associate the stream with their Razer ID  StreamGetStatus() 
+shortcode: Pass the address of a preallocated character buffer to get the
+streaming auth code. The buffer should have a minimum length of 6.  length:
+Length will return as zero if the streaming auth code could not be obtained.
+If length is greater than zero, it will be the length of the returned streaming
+auth code.  Once you have the shortcode, it should be shown to the user
+so they can associate the stream with their Razer ID  StreamGetStatus()
 should return the READY status before invoking this method.
 
 ```vb
@@ -1994,9 +2094,9 @@ ChromaAnimationAPI.CoreStreamGetAuthShortcode(ByRef shortcode As String, ByRef l
 <a name="CoreStreamGetFocus"></a>
 **CoreStreamGetFocus**
 
-focus: Pass the address of a preallocated character buffer to get the stream 
-focus. The buffer should have a length of 48  length: Length will return 
-as zero if the stream focus could not be obtained. If length is greater 
+focus: Pass the address of a preallocated character buffer to get the stream
+focus. The buffer should have a length of 48  length: Length will return
+as zero if the stream focus could not be obtained. If length is greater
 than zero, it will be the length of the returned stream focus.
 
 ```vb
@@ -2008,17 +2108,17 @@ Dim result As Boolean = ChromaAnimationAPI.CoreStreamGetFocus(ByRef focus As Str
 <a name="CoreStreamGetId"></a>
 **CoreStreamGetId**
 
-Intended for Cloud Gaming Platforms, store the stream id to persist in user 
-preferences to continue streaming if the game is suspended or closed. shortcode: 
-The shortcode is a null terminated string. Use the shortcode that authorized 
-the stream to obtain the stream id.  streamId should be a preallocated 
-buffer to get the stream key. The buffer should have a length of 48.  length: 
-Length will return zero if the key could not be obtained. If the length 
-is greater than zero, it will be the length of the returned streaming id. 
-Retrieve the stream id after authorizing the shortcode. The authorization 
-window will expire in 5 minutes. Be sure to save the stream key before 
-the window expires.  platform: is the null terminated string that identifies 
-the source of the stream: { GEFORCE_NOW, LUNA, STADIA, GAME_PASS } 
+Intended for Cloud Gaming Platforms, store the stream id to persist in user
+preferences to continue streaming if the game is suspended or closed. shortcode:
+The shortcode is a null terminated string. Use the shortcode that authorized
+the stream to obtain the stream id.  streamId should be a preallocated
+buffer to get the stream key. The buffer should have a length of 48.  length:
+Length will return zero if the key could not be obtained. If the length
+is greater than zero, it will be the length of the returned streaming id.
+Retrieve the stream id after authorizing the shortcode. The authorization
+window will expire in 5 minutes. Be sure to save the stream key before
+the window expires.  platform: is the null terminated string that identifies
+the source of the stream: { GEFORCE_NOW, LUNA, STADIA, GAME_PASS }
 StreamGetStatus() should return the READY status to use this method.
 
 ```vb
@@ -2030,18 +2130,18 @@ ChromaAnimationAPI.CoreStreamGetId(shortcode As String, ByRef streamId As String
 <a name="CoreStreamGetKey"></a>
 **CoreStreamGetKey**
 
-Intended for Cloud Gaming Platforms, store the streaming key to persist 
-in user preferences to continue streaming if the game is suspended or closed. 
-shortcode: The shortcode is a null terminated string. Use the shortcode 
-that authorized the stream to obtain the stream key.  If the status is 
-in the BROADCASTING or WATCHING state, passing a NULL shortcode will return 
-the active streamId.  streamKey should be a preallocated buffer to get 
-the stream key. The buffer should have a length of 48.  length: Length 
-will return zero if the key could not be obtained. If the length is greater 
-than zero, it will be the length of the returned streaming key.  Retrieve 
-the stream key after authorizing the shortcode. The authorization window 
-will expire in 5 minutes. Be sure to save the stream key before the window 
-expires.  StreamGetStatus() should return the READY status to use this 
+Intended for Cloud Gaming Platforms, store the streaming key to persist
+in user preferences to continue streaming if the game is suspended or closed.
+shortcode: The shortcode is a null terminated string. Use the shortcode
+that authorized the stream to obtain the stream key.  If the status is
+in the BROADCASTING or WATCHING state, passing a NULL shortcode will return
+the active streamId.  streamKey should be a preallocated buffer to get
+the stream key. The buffer should have a length of 48.  length: Length
+will return zero if the key could not be obtained. If the length is greater
+than zero, it will be the length of the returned streaming key.  Retrieve
+the stream key after authorizing the shortcode. The authorization window
+will expire in 5 minutes. Be sure to save the stream key before the window
+expires.  StreamGetStatus() should return the READY status to use this
 method.
 
 ```vb
@@ -2075,9 +2175,9 @@ Dim result As String = ChromaAnimationAPI.CoreStreamGetStatusString(status As Ch
 <a name="CoreStreamReleaseShortcode"></a>
 **CoreStreamReleaseShortcode**
 
-This prevents the stream id and stream key from being obtained through the 
-shortcode. This closes the auth window.  shortcode is a null terminated 
-string.  StreamGetStatus() should return the READY status to use this method. 
+This prevents the stream id and stream key from being obtained through the
+shortcode. This closes the auth window.  shortcode is a null terminated
+string.  StreamGetStatus() should return the READY status to use this method.
 returns success when shortcode has been released
 
 ```vb
@@ -2089,8 +2189,8 @@ Dim result As Boolean = ChromaAnimationAPI.CoreStreamReleaseShortcode(shortcode 
 <a name="CoreStreamSetFocus"></a>
 **CoreStreamSetFocus**
 
-The focus is a null terminated string. Set the focus identifer for the application 
-designated to automatically change the streaming state.  Returns true on 
+The focus is a null terminated string. Set the focus identifer for the application
+designated to automatically change the streaming state.  Returns true on
 success.
 
 ```vb
@@ -2102,7 +2202,7 @@ Dim result As Boolean = ChromaAnimationAPI.CoreStreamSetFocus(focus As String)
 <a name="CoreStreamSupportsStreaming"></a>
 **CoreStreamSupportsStreaming**
 
-Returns true if the Chroma streaming is supported. If false is returned, 
+Returns true if the Chroma streaming is supported. If false is returned,
 avoid calling stream methods.
 
 ```vb
@@ -2114,8 +2214,8 @@ Dim result As Boolean = ChromaAnimationAPI.CoreStreamSupportsStreaming()
 <a name="CoreStreamWatch"></a>
 **CoreStreamWatch**
 
-Begin watching the Chroma RGB data using streamID parameter.  streamId is 
-a null terminated string.  StreamGetStatus() should return the READY status 
+Begin watching the Chroma RGB data using streamID parameter.  streamId is
+a null terminated string.  StreamGetStatus() should return the READY status
 to use this method.
 
 ```vb
@@ -2127,7 +2227,7 @@ Dim result As Boolean = ChromaAnimationAPI.CoreStreamWatch(streamId As String, t
 <a name="CoreStreamWatchEnd"></a>
 **CoreStreamWatchEnd**
 
-End watching Chroma RGB data stream.  StreamGetStatus() should return the 
+End watching Chroma RGB data stream.  StreamGetStatus() should return the
 WATCHING status to use this method.
 
 ```vb
@@ -2150,12 +2250,12 @@ Dim result As Integer = ChromaAnimationAPI.CoreUnInit()
 <a name="CreateAnimation"></a>
 **CreateAnimation**
 
-Creates a `Chroma` animation at the given path. The `deviceType` parameter 
-uses `EChromaSDKDeviceTypeEnum` as an integer. The `device` parameter uses 
-`EChromaSDKDevice1DEnum` or `EChromaSDKDevice2DEnum` as an integer, respective 
-to the `deviceType`. Returns the animation id upon success. Returns -1 
-upon failure. Saves a `Chroma` animation file with the `.chroma` extension 
-at the given path. Returns the animation id upon success. Returns -1 upon 
+Creates a `Chroma` animation at the given path. The `deviceType` parameter
+uses `EChromaSDKDeviceTypeEnum` as an integer. The `device` parameter uses
+`EChromaSDKDevice1DEnum` or `EChromaSDKDevice2DEnum` as an integer, respective
+to the `deviceType`. Returns the animation id upon success. Returns -1
+upon failure. Saves a `Chroma` animation file with the `.chroma` extension
+at the given path. Returns the animation id upon success. Returns -1 upon
 failure.
 
 ```vb
@@ -2167,11 +2267,11 @@ Dim result As Integer = ChromaAnimationAPI.CreateAnimation(path As String, devic
 <a name="CreateAnimationInMemory"></a>
 **CreateAnimationInMemory**
 
-Creates a `Chroma` animation in memory without creating a file. The `deviceType` 
-parameter uses `EChromaSDKDeviceTypeEnum` as an integer. The `device` parameter 
-uses `EChromaSDKDevice1DEnum` or `EChromaSDKDevice2DEnum` as an integer, 
-respective to the `deviceType`. Returns the animation id upon success. 
-Returns -1 upon failure. Returns the animation id upon success. Returns 
+Creates a `Chroma` animation in memory without creating a file. The `deviceType`
+parameter uses `EChromaSDKDeviceTypeEnum` as an integer. The `device` parameter
+uses `EChromaSDKDevice1DEnum` or `EChromaSDKDevice2DEnum` as an integer,
+respective to the `deviceType`. Returns the animation id upon success.
+Returns -1 upon failure. Returns the animation id upon success. Returns
 -1 upon failure.
 
 ```vb
@@ -2205,7 +2305,7 @@ Dim result As Integer = ChromaAnimationAPI.DeleteEffect(effectId As Guid)
 <a name="DuplicateFirstFrame"></a>
 **DuplicateFirstFrame**
 
-Duplicate the first animation frame so that the animation length matches 
+Duplicate the first animation frame so that the animation length matches
 the frame count. Animation is referenced by id.
 
 ```vb
@@ -2217,7 +2317,7 @@ ChromaAnimationAPI.DuplicateFirstFrame(animationId As Integer, frameCount As Int
 <a name="DuplicateFirstFrameName"></a>
 **DuplicateFirstFrameName**
 
-Duplicate the first animation frame so that the animation length matches 
+Duplicate the first animation frame so that the animation length matches
 the frame count. Animation is referenced by name.
 
 ```vb
@@ -2240,8 +2340,8 @@ Dim result As Double = ChromaAnimationAPI.DuplicateFirstFrameNameD(path As Strin
 <a name="DuplicateFrames"></a>
 **DuplicateFrames**
 
-Duplicate all the frames of the animation to double the animation length. 
-Frame 1 becomes frame 1 and 2. Frame 2 becomes frame 3 and 4. And so on. 
+Duplicate all the frames of the animation to double the animation length.
+Frame 1 becomes frame 1 and 2. Frame 2 becomes frame 3 and 4. And so on.
 The animation is referenced by id.
 
 ```vb
@@ -2253,8 +2353,8 @@ ChromaAnimationAPI.DuplicateFrames(animationId As Integer)
 <a name="DuplicateFramesName"></a>
 **DuplicateFramesName**
 
-Duplicate all the frames of the animation to double the animation length. 
-Frame 1 becomes frame 1 and 2. Frame 2 becomes frame 3 and 4. And so on. 
+Duplicate all the frames of the animation to double the animation length.
+Frame 1 becomes frame 1 and 2. Frame 2 becomes frame 3 and 4. And so on.
 The animation is referenced by name.
 
 ```vb
@@ -2277,7 +2377,7 @@ Dim result As Double = ChromaAnimationAPI.DuplicateFramesNameD(path As String)
 <a name="DuplicateMirrorFrames"></a>
 **DuplicateMirrorFrames**
 
-Duplicate all the animation frames in reverse so that the animation plays 
+Duplicate all the animation frames in reverse so that the animation plays
 forwards and backwards. Animation is referenced by id.
 
 ```vb
@@ -2289,7 +2389,7 @@ ChromaAnimationAPI.DuplicateMirrorFrames(animationId As Integer)
 <a name="DuplicateMirrorFramesName"></a>
 **DuplicateMirrorFramesName**
 
-Duplicate all the animation frames in reverse so that the animation plays 
+Duplicate all the animation frames in reverse so that the animation plays
 forwards and backwards. Animation is referenced by name.
 
 ```vb
@@ -2312,7 +2412,7 @@ Dim result As Double = ChromaAnimationAPI.DuplicateMirrorFramesNameD(path As Str
 <a name="FadeEndFrames"></a>
 **FadeEndFrames**
 
-Fade the animation to black starting at the fade frame index to the end 
+Fade the animation to black starting at the fade frame index to the end
 of the animation. Animation is referenced by id.
 
 ```vb
@@ -2324,7 +2424,7 @@ ChromaAnimationAPI.FadeEndFrames(animationId As Integer, fade As Integer)
 <a name="FadeEndFramesName"></a>
 **FadeEndFramesName**
 
-Fade the animation to black starting at the fade frame index to the end 
+Fade the animation to black starting at the fade frame index to the end
 of the animation. Animation is referenced by name.
 
 ```vb
@@ -2347,7 +2447,7 @@ Dim result As Double = ChromaAnimationAPI.FadeEndFramesNameD(path As String, fad
 <a name="FadeStartFrames"></a>
 **FadeStartFrames**
 
-Fade the animation from black to full color starting at 0 to the fade frame 
+Fade the animation from black to full color starting at 0 to the fade frame
 index. Animation is referenced by id.
 
 ```vb
@@ -2359,7 +2459,7 @@ ChromaAnimationAPI.FadeStartFrames(animationId As Integer, fade As Integer)
 <a name="FadeStartFramesName"></a>
 **FadeStartFramesName**
 
-Fade the animation from black to full color starting at 0 to the fade frame 
+Fade the animation from black to full color starting at 0 to the fade frame
 index. Animation is referenced by name.
 
 ```vb
@@ -2382,7 +2482,7 @@ Dim result As Double = ChromaAnimationAPI.FadeStartFramesNameD(path As String, f
 <a name="FillColor"></a>
 **FillColor**
 
-Set the RGB value for all colors in the specified frame. Animation is referenced 
+Set the RGB value for all colors in the specified frame. Animation is referenced
 by id.
 
 ```vb
@@ -2394,7 +2494,7 @@ ChromaAnimationAPI.FillColor(animationId As Integer, frameId As Integer, color A
 <a name="FillColorAllFrames"></a>
 **FillColorAllFrames**
 
-Set the RGB value for all colors for all frames. Animation is referenced 
+Set the RGB value for all colors for all frames. Animation is referenced
 by id.
 
 ```vb
@@ -2406,7 +2506,7 @@ ChromaAnimationAPI.FillColorAllFrames(animationId As Integer, color As Integer)
 <a name="FillColorAllFramesName"></a>
 **FillColorAllFramesName**
 
-Set the RGB value for all colors for all frames. Animation is referenced 
+Set the RGB value for all colors for all frames. Animation is referenced
 by name.
 
 ```vb
@@ -2429,7 +2529,7 @@ Dim result As Double = ChromaAnimationAPI.FillColorAllFramesNameD(path As String
 <a name="FillColorAllFramesRGB"></a>
 **FillColorAllFramesRGB**
 
-Set the RGB value for all colors for all frames. Use the range of 0 to 255 
+Set the RGB value for all colors for all frames. Use the range of 0 to 255
 for red, green, and blue parameters. Animation is referenced by id.
 
 ```vb
@@ -2441,7 +2541,7 @@ ChromaAnimationAPI.FillColorAllFramesRGB(animationId As Integer, red As Integer,
 <a name="FillColorAllFramesRGBName"></a>
 **FillColorAllFramesRGBName**
 
-Set the RGB value for all colors for all frames. Use the range of 0 to 255 
+Set the RGB value for all colors for all frames. Use the range of 0 to 255
 for red, green, and blue parameters. Animation is referenced by name.
 
 ```vb
@@ -2464,7 +2564,7 @@ Dim result As Double = ChromaAnimationAPI.FillColorAllFramesRGBNameD(path As Str
 <a name="FillColorName"></a>
 **FillColorName**
 
-Set the RGB value for all colors in the specified frame. Animation is referenced 
+Set the RGB value for all colors in the specified frame. Animation is referenced
 by name.
 
 ```vb
@@ -2487,7 +2587,7 @@ Dim result As Double = ChromaAnimationAPI.FillColorNameD(path As String, frameId
 <a name="FillColorRGB"></a>
 **FillColorRGB**
 
-Set the RGB value for all colors in the specified frame. Animation is referenced 
+Set the RGB value for all colors in the specified frame. Animation is referenced
 by id.
 
 ```vb
@@ -2499,7 +2599,7 @@ ChromaAnimationAPI.FillColorRGB(animationId As Integer, frameId As Integer, red 
 <a name="FillColorRGBName"></a>
 **FillColorRGBName**
 
-Set the RGB value for all colors in the specified frame. Animation is referenced 
+Set the RGB value for all colors in the specified frame. Animation is referenced
 by name.
 
 ```vb
@@ -2522,8 +2622,8 @@ Dim result As Double = ChromaAnimationAPI.FillColorRGBNameD(path As String, fram
 <a name="FillNonZeroColor"></a>
 **FillNonZeroColor**
 
-This method will only update colors in the animation that are not already 
-set to black. Set the RGB value for a subset of colors in the specified 
+This method will only update colors in the animation that are not already
+set to black. Set the RGB value for a subset of colors in the specified
 frame. Animation is referenced by id.
 
 ```vb
@@ -2535,8 +2635,8 @@ ChromaAnimationAPI.FillNonZeroColor(animationId As Integer, frameId As Integer, 
 <a name="FillNonZeroColorAllFrames"></a>
 **FillNonZeroColorAllFrames**
 
-This method will only update colors in the animation that are not already 
-set to black. Set the RGB value for a subset of colors for all frames. 
+This method will only update colors in the animation that are not already
+set to black. Set the RGB value for a subset of colors for all frames.
 Animation is referenced by id.
 
 ```vb
@@ -2548,8 +2648,8 @@ ChromaAnimationAPI.FillNonZeroColorAllFrames(animationId As Integer, color As In
 <a name="FillNonZeroColorAllFramesName"></a>
 **FillNonZeroColorAllFramesName**
 
-This method will only update colors in the animation that are not already 
-set to black. Set the RGB value for a subset of colors for all frames. 
+This method will only update colors in the animation that are not already
+set to black. Set the RGB value for a subset of colors for all frames.
 Animation is referenced by name.
 
 ```vb
@@ -2572,9 +2672,9 @@ Dim result As Double = ChromaAnimationAPI.FillNonZeroColorAllFramesNameD(path As
 <a name="FillNonZeroColorAllFramesRGB"></a>
 **FillNonZeroColorAllFramesRGB**
 
-This method will only update colors in the animation that are not already 
-set to black. Set the RGB value for a subset of colors for all frames. 
-Use the range of 0 to 255 for red, green, and blue parameters. Animation 
+This method will only update colors in the animation that are not already
+set to black. Set the RGB value for a subset of colors for all frames.
+Use the range of 0 to 255 for red, green, and blue parameters. Animation
 is referenced by id.
 
 ```vb
@@ -2586,9 +2686,9 @@ ChromaAnimationAPI.FillNonZeroColorAllFramesRGB(animationId As Integer, red As I
 <a name="FillNonZeroColorAllFramesRGBName"></a>
 **FillNonZeroColorAllFramesRGBName**
 
-This method will only update colors in the animation that are not already 
-set to black. Set the RGB value for a subset of colors for all frames. 
-Use the range of 0 to 255 for red, green, and blue parameters. Animation 
+This method will only update colors in the animation that are not already
+set to black. Set the RGB value for a subset of colors for all frames.
+Use the range of 0 to 255 for red, green, and blue parameters. Animation
 is referenced by name.
 
 ```vb
@@ -2611,8 +2711,8 @@ Dim result As Double = ChromaAnimationAPI.FillNonZeroColorAllFramesRGBNameD(path
 <a name="FillNonZeroColorName"></a>
 **FillNonZeroColorName**
 
-This method will only update colors in the animation that are not already 
-set to black. Set the RGB value for a subset of colors in the specified 
+This method will only update colors in the animation that are not already
+set to black. Set the RGB value for a subset of colors in the specified
 frame. Animation is referenced by name.
 
 ```vb
@@ -2635,9 +2735,9 @@ Dim result As Double = ChromaAnimationAPI.FillNonZeroColorNameD(path As String, 
 <a name="FillNonZeroColorRGB"></a>
 **FillNonZeroColorRGB**
 
-This method will only update colors in the animation that are not already 
-set to black. Set the RGB value for a subset of colors in the specified 
-frame. Use the range of 0 to 255 for red, green, and blue parameters. Animation 
+This method will only update colors in the animation that are not already
+set to black. Set the RGB value for a subset of colors in the specified
+frame. Use the range of 0 to 255 for red, green, and blue parameters. Animation
 is referenced by id.
 
 ```vb
@@ -2649,9 +2749,9 @@ ChromaAnimationAPI.FillNonZeroColorRGB(animationId As Integer, frameId As Intege
 <a name="FillNonZeroColorRGBName"></a>
 **FillNonZeroColorRGBName**
 
-This method will only update colors in the animation that are not already 
-set to black. Set the RGB value for a subset of colors in the specified 
-frame. Use the range of 0 to 255 for red, green, and blue parameters. Animation 
+This method will only update colors in the animation that are not already
+set to black. Set the RGB value for a subset of colors in the specified
+frame. Use the range of 0 to 255 for red, green, and blue parameters. Animation
 is referenced by name.
 
 ```vb
@@ -2674,7 +2774,7 @@ Dim result As Double = ChromaAnimationAPI.FillNonZeroColorRGBNameD(path As Strin
 <a name="FillRandomColors"></a>
 **FillRandomColors**
 
-Fill the frame with random RGB values for the given frame. Animation is 
+Fill the frame with random RGB values for the given frame. Animation is
 referenced by id.
 
 ```vb
@@ -2686,7 +2786,7 @@ ChromaAnimationAPI.FillRandomColors(animationId As Integer, frameId As Integer)
 <a name="FillRandomColorsAllFrames"></a>
 **FillRandomColorsAllFrames**
 
-Fill the frame with random RGB values for all frames. Animation is referenced 
+Fill the frame with random RGB values for all frames. Animation is referenced
 by id.
 
 ```vb
@@ -2698,7 +2798,7 @@ ChromaAnimationAPI.FillRandomColorsAllFrames(animationId As Integer)
 <a name="FillRandomColorsAllFramesName"></a>
 **FillRandomColorsAllFramesName**
 
-Fill the frame with random RGB values for all frames. Animation is referenced 
+Fill the frame with random RGB values for all frames. Animation is referenced
 by name.
 
 ```vb
@@ -2721,7 +2821,7 @@ Dim result As Double = ChromaAnimationAPI.FillRandomColorsAllFramesNameD(path As
 <a name="FillRandomColorsBlackAndWhite"></a>
 **FillRandomColorsBlackAndWhite**
 
-Fill the frame with random black and white values for the specified frame. 
+Fill the frame with random black and white values for the specified frame.
 Animation is referenced by id.
 
 ```vb
@@ -2733,7 +2833,7 @@ ChromaAnimationAPI.FillRandomColorsBlackAndWhite(animationId As Integer, frameId
 <a name="FillRandomColorsBlackAndWhiteAllFrames"></a>
 **FillRandomColorsBlackAndWhiteAllFrames**
 
-Fill the frame with random black and white values for all frames. Animation 
+Fill the frame with random black and white values for all frames. Animation
 is referenced by id.
 
 ```vb
@@ -2745,7 +2845,7 @@ ChromaAnimationAPI.FillRandomColorsBlackAndWhiteAllFrames(animationId As Integer
 <a name="FillRandomColorsBlackAndWhiteAllFramesName"></a>
 **FillRandomColorsBlackAndWhiteAllFramesName**
 
-Fill the frame with random black and white values for all frames. Animation 
+Fill the frame with random black and white values for all frames. Animation
 is referenced by name.
 
 ```vb
@@ -2768,7 +2868,7 @@ Dim result As Double = ChromaAnimationAPI.FillRandomColorsBlackAndWhiteAllFrames
 <a name="FillRandomColorsBlackAndWhiteName"></a>
 **FillRandomColorsBlackAndWhiteName**
 
-Fill the frame with random black and white values for the specified frame. 
+Fill the frame with random black and white values for the specified frame.
 Animation is referenced by name.
 
 ```vb
@@ -2791,7 +2891,7 @@ Dim result As Double = ChromaAnimationAPI.FillRandomColorsBlackAndWhiteNameD(pat
 <a name="FillRandomColorsName"></a>
 **FillRandomColorsName**
 
-Fill the frame with random RGB values for the given frame. Animation is 
+Fill the frame with random RGB values for the given frame. Animation is
 referenced by name.
 
 ```vb
@@ -2814,7 +2914,7 @@ Dim result As Double = ChromaAnimationAPI.FillRandomColorsNameD(path As String, 
 <a name="FillThresholdColors"></a>
 **FillThresholdColors**
 
-Fill the specified frame with RGB color where the animation color is less 
+Fill the specified frame with RGB color where the animation color is less
 than the RGB threshold. Animation is referenced by id.
 
 ```vb
@@ -2826,7 +2926,7 @@ ChromaAnimationAPI.FillThresholdColors(animationId As Integer, frameId As Intege
 <a name="FillThresholdColorsAllFrames"></a>
 **FillThresholdColorsAllFrames**
 
-Fill all frames with RGB color where the animation color is less than the 
+Fill all frames with RGB color where the animation color is less than the
 RGB threshold. Animation is referenced by id.
 
 ```vb
@@ -2838,7 +2938,7 @@ ChromaAnimationAPI.FillThresholdColorsAllFrames(animationId As Integer, threshol
 <a name="FillThresholdColorsAllFramesName"></a>
 **FillThresholdColorsAllFramesName**
 
-Fill all frames with RGB color where the animation color is less than the 
+Fill all frames with RGB color where the animation color is less than the
 RGB threshold. Animation is referenced by name.
 
 ```vb
@@ -2861,7 +2961,7 @@ Dim result As Double = ChromaAnimationAPI.FillThresholdColorsAllFramesNameD(path
 <a name="FillThresholdColorsAllFramesRGB"></a>
 **FillThresholdColorsAllFramesRGB**
 
-Fill all frames with RGB color where the animation color is less than the 
+Fill all frames with RGB color where the animation color is less than the
 threshold. Animation is referenced by id.
 
 ```vb
@@ -2873,7 +2973,7 @@ ChromaAnimationAPI.FillThresholdColorsAllFramesRGB(animationId As Integer, thres
 <a name="FillThresholdColorsAllFramesRGBName"></a>
 **FillThresholdColorsAllFramesRGBName**
 
-Fill all frames with RGB color where the animation color is less than the 
+Fill all frames with RGB color where the animation color is less than the
 threshold. Animation is referenced by name.
 
 ```vb
@@ -2896,8 +2996,8 @@ Dim result As Double = ChromaAnimationAPI.FillThresholdColorsAllFramesRGBNameD(p
 <a name="FillThresholdColorsMinMaxAllFramesRGB"></a>
 **FillThresholdColorsMinMaxAllFramesRGB**
 
-Fill all frames with the min RGB color where the animation color is less 
-than the min threshold AND with the max RGB color where the animation is 
+Fill all frames with the min RGB color where the animation color is less
+than the min threshold AND with the max RGB color where the animation is
 more than the max threshold. Animation is referenced by id.
 
 ```vb
@@ -2909,8 +3009,8 @@ ChromaAnimationAPI.FillThresholdColorsMinMaxAllFramesRGB(animationId As Integer,
 <a name="FillThresholdColorsMinMaxAllFramesRGBName"></a>
 **FillThresholdColorsMinMaxAllFramesRGBName**
 
-Fill all frames with the min RGB color where the animation color is less 
-than the min threshold AND with the max RGB color where the animation is 
+Fill all frames with the min RGB color where the animation color is less
+than the min threshold AND with the max RGB color where the animation is
 more than the max threshold. Animation is referenced by name.
 
 ```vb
@@ -2933,8 +3033,8 @@ Dim result As Double = ChromaAnimationAPI.FillThresholdColorsMinMaxAllFramesRGBN
 <a name="FillThresholdColorsMinMaxRGB"></a>
 **FillThresholdColorsMinMaxRGB**
 
-Fill the specified frame with the min RGB color where the animation color 
-is less than the min threshold AND with the max RGB color where the animation 
+Fill the specified frame with the min RGB color where the animation color
+is less than the min threshold AND with the max RGB color where the animation
 is more than the max threshold. Animation is referenced by id.
 
 ```vb
@@ -2946,8 +3046,8 @@ ChromaAnimationAPI.FillThresholdColorsMinMaxRGB(animationId As Integer, frameId 
 <a name="FillThresholdColorsMinMaxRGBName"></a>
 **FillThresholdColorsMinMaxRGBName**
 
-Fill the specified frame with the min RGB color where the animation color 
-is less than the min threshold AND with the max RGB color where the animation 
+Fill the specified frame with the min RGB color where the animation color
+is less than the min threshold AND with the max RGB color where the animation
 is more than the max threshold. Animation is referenced by name.
 
 ```vb
@@ -2970,7 +3070,7 @@ Dim result As Double = ChromaAnimationAPI.FillThresholdColorsMinMaxRGBNameD(path
 <a name="FillThresholdColorsName"></a>
 **FillThresholdColorsName**
 
-Fill the specified frame with RGB color where the animation color is less 
+Fill the specified frame with RGB color where the animation color is less
 than the RGB threshold. Animation is referenced by name.
 
 ```vb
@@ -2993,7 +3093,7 @@ Dim result As Double = ChromaAnimationAPI.FillThresholdColorsNameD(path As Strin
 <a name="FillThresholdColorsRGB"></a>
 **FillThresholdColorsRGB**
 
-Fill the specified frame with RGB color where the animation color is less 
+Fill the specified frame with RGB color where the animation color is less
 than the RGB threshold. Animation is referenced by id.
 
 ```vb
@@ -3005,7 +3105,7 @@ ChromaAnimationAPI.FillThresholdColorsRGB(animationId As Integer, frameId As Int
 <a name="FillThresholdColorsRGBName"></a>
 **FillThresholdColorsRGBName**
 
-Fill the specified frame with RGB color where the animation color is less 
+Fill the specified frame with RGB color where the animation color is less
 than the RGB threshold. Animation is referenced by name.
 
 ```vb
@@ -3028,7 +3128,7 @@ Dim result As Double = ChromaAnimationAPI.FillThresholdColorsRGBNameD(path As St
 <a name="FillThresholdRGBColorsAllFramesRGB"></a>
 **FillThresholdRGBColorsAllFramesRGB**
 
-Fill all frames with RGB color where the animation color is less than the 
+Fill all frames with RGB color where the animation color is less than the
 RGB threshold. Animation is referenced by id.
 
 ```vb
@@ -3040,7 +3140,7 @@ ChromaAnimationAPI.FillThresholdRGBColorsAllFramesRGB(animationId As Integer, re
 <a name="FillThresholdRGBColorsAllFramesRGBName"></a>
 **FillThresholdRGBColorsAllFramesRGBName**
 
-Fill all frames with RGB color where the animation color is less than the 
+Fill all frames with RGB color where the animation color is less than the
 RGB threshold. Animation is referenced by name.
 
 ```vb
@@ -3063,7 +3163,7 @@ Dim result As Double = ChromaAnimationAPI.FillThresholdRGBColorsAllFramesRGBName
 <a name="FillThresholdRGBColorsRGB"></a>
 **FillThresholdRGBColorsRGB**
 
-Fill the specified frame with RGB color where the animation color is less 
+Fill the specified frame with RGB color where the animation color is less
 than the RGB threshold. Animation is referenced by id.
 
 ```vb
@@ -3075,7 +3175,7 @@ ChromaAnimationAPI.FillThresholdRGBColorsRGB(animationId As Integer, frameId As 
 <a name="FillThresholdRGBColorsRGBName"></a>
 **FillThresholdRGBColorsRGBName**
 
-Fill the specified frame with RGB color where the animation color is less 
+Fill the specified frame with RGB color where the animation color is less
 than the RGB threshold. Animation is referenced by name.
 
 ```vb
@@ -3098,7 +3198,7 @@ Dim result As Double = ChromaAnimationAPI.FillThresholdRGBColorsRGBNameD(path As
 <a name="FillZeroColor"></a>
 **FillZeroColor**
 
-Fill the specified frame with RGB color where the animation color is zero. 
+Fill the specified frame with RGB color where the animation color is zero.
 Animation is referenced by id.
 
 ```vb
@@ -3110,7 +3210,7 @@ ChromaAnimationAPI.FillZeroColor(animationId As Integer, frameId As Integer, col
 <a name="FillZeroColorAllFrames"></a>
 **FillZeroColorAllFrames**
 
-Fill all frames with RGB color where the animation color is zero. Animation 
+Fill all frames with RGB color where the animation color is zero. Animation
 is referenced by id.
 
 ```vb
@@ -3122,7 +3222,7 @@ ChromaAnimationAPI.FillZeroColorAllFrames(animationId As Integer, color As Integ
 <a name="FillZeroColorAllFramesName"></a>
 **FillZeroColorAllFramesName**
 
-Fill all frames with RGB color where the animation color is zero. Animation 
+Fill all frames with RGB color where the animation color is zero. Animation
 is referenced by name.
 
 ```vb
@@ -3145,7 +3245,7 @@ Dim result As Double = ChromaAnimationAPI.FillZeroColorAllFramesNameD(path As St
 <a name="FillZeroColorAllFramesRGB"></a>
 **FillZeroColorAllFramesRGB**
 
-Fill all frames with RGB color where the animation color is zero. Animation 
+Fill all frames with RGB color where the animation color is zero. Animation
 is referenced by id.
 
 ```vb
@@ -3157,7 +3257,7 @@ ChromaAnimationAPI.FillZeroColorAllFramesRGB(animationId As Integer, red As Inte
 <a name="FillZeroColorAllFramesRGBName"></a>
 **FillZeroColorAllFramesRGBName**
 
-Fill all frames with RGB color where the animation color is zero. Animation 
+Fill all frames with RGB color where the animation color is zero. Animation
 is referenced by name.
 
 ```vb
@@ -3180,7 +3280,7 @@ Dim result As Double = ChromaAnimationAPI.FillZeroColorAllFramesRGBNameD(path As
 <a name="FillZeroColorName"></a>
 **FillZeroColorName**
 
-Fill the specified frame with RGB color where the animation color is zero. 
+Fill the specified frame with RGB color where the animation color is zero.
 Animation is referenced by name.
 
 ```vb
@@ -3203,7 +3303,7 @@ Dim result As Double = ChromaAnimationAPI.FillZeroColorNameD(path As String, fra
 <a name="FillZeroColorRGB"></a>
 **FillZeroColorRGB**
 
-Fill the specified frame with RGB color where the animation color is zero. 
+Fill the specified frame with RGB color where the animation color is zero.
 Animation is referenced by id.
 
 ```vb
@@ -3215,7 +3315,7 @@ ChromaAnimationAPI.FillZeroColorRGB(animationId As Integer, frameId As Integer, 
 <a name="FillZeroColorRGBName"></a>
 **FillZeroColorRGBName**
 
-Fill the specified frame with RGB color where the animation color is zero. 
+Fill the specified frame with RGB color where the animation color is zero.
 Animation is referenced by name.
 
 ```vb
@@ -3238,8 +3338,8 @@ Dim result As Double = ChromaAnimationAPI.FillZeroColorRGBNameD(path As String, 
 <a name="Get1DColor"></a>
 **Get1DColor**
 
-Get the animation color for a frame given the `1D` `led`. The `led` should 
-be greater than or equal to 0 and less than the `MaxLeds`. Animation is 
+Get the animation color for a frame given the `1D` `led`. The `led` should
+be greater than or equal to 0 and less than the `MaxLeds`. Animation is
 referenced by id.
 
 ```vb
@@ -3251,8 +3351,8 @@ Dim result As Integer = ChromaAnimationAPI.Get1DColor(animationId As Integer, fr
 <a name="Get1DColorName"></a>
 **Get1DColorName**
 
-Get the animation color for a frame given the `1D` `led`. The `led` should 
-be greater than or equal to 0 and less than the `MaxLeds`. Animation is 
+Get the animation color for a frame given the `1D` `led`. The `led` should
+be greater than or equal to 0 and less than the `MaxLeds`. Animation is
 referenced by name.
 
 ```vb
@@ -3275,9 +3375,9 @@ Dim result As Double = ChromaAnimationAPI.Get1DColorNameD(path As String, frameI
 <a name="Get2DColor"></a>
 **Get2DColor**
 
-Get the animation color for a frame given the `2D` `row` and `column`. The 
-`row` should be greater than or equal to 0 and less than the `MaxRow`. 
-The `column` should be greater than or equal to 0 and less than the `MaxColumn`. 
+Get the animation color for a frame given the `2D` `row` and `column`. The
+`row` should be greater than or equal to 0 and less than the `MaxRow`.
+The `column` should be greater than or equal to 0 and less than the `MaxColumn`.
 Animation is referenced by id.
 
 ```vb
@@ -3289,9 +3389,9 @@ Dim result As Integer = ChromaAnimationAPI.Get2DColor(animationId As Integer, fr
 <a name="Get2DColorName"></a>
 **Get2DColorName**
 
-Get the animation color for a frame given the `2D` `row` and `column`. The 
-`row` should be greater than or equal to 0 and less than the `MaxRow`. 
-The `column` should be greater than or equal to 0 and less than the `MaxColumn`. 
+Get the animation color for a frame given the `2D` `row` and `column`. The
+`row` should be greater than or equal to 0 and less than the `MaxRow`.
+The `column` should be greater than or equal to 0 and less than the `MaxColumn`.
 Animation is referenced by name.
 
 ```vb
@@ -3347,9 +3447,9 @@ Dim result As Double = ChromaAnimationAPI.GetAnimationD(name As String)
 <a name="GetAnimationId"></a>
 **GetAnimationId**
 
-`PluginGetAnimationId` will return the `animationId` given the `index` of 
-the loaded animation. The `index` is zero-based and less than the number 
-returned by `PluginGetAnimationCount`. Use `PluginGetAnimationName` to 
+`PluginGetAnimationId` will return the `animationId` given the `index` of
+the loaded animation. The `index` is zero-based and less than the number
+returned by `PluginGetAnimationCount`. Use `PluginGetAnimationName` to
 get the name of the animation.
 
 ```vb
@@ -3361,8 +3461,8 @@ Dim result As Integer = ChromaAnimationAPI.GetAnimationId(index As Integer)
 <a name="GetAnimationName"></a>
 **GetAnimationName**
 
-`PluginGetAnimationName` takes an `animationId` and returns the name of 
-the animation of the `.chroma` animation file. If a name is not available 
+`PluginGetAnimationName` takes an `animationId` and returns the name of
+the animation of the `.chroma` animation file. If a name is not available
 then an empty string will be returned.
 
 ```vb
@@ -3407,8 +3507,8 @@ Dim result As Double = ChromaAnimationAPI.GetCurrentFrameNameD(path As String)
 <a name="GetDevice"></a>
 **GetDevice**
 
-Returns the `EChromaSDKDevice1DEnum` or `EChromaSDKDevice2DEnum` of a `Chroma` 
-animation respective to the `deviceType`, as an integer upon success. Returns 
+Returns the `EChromaSDKDevice1DEnum` or `EChromaSDKDevice2DEnum` of a `Chroma`
+animation respective to the `deviceType`, as an integer upon success. Returns
 -1 upon failure.
 
 ```vb
@@ -3420,8 +3520,8 @@ Dim result As Integer = ChromaAnimationAPI.GetDevice(animationId As Integer)
 <a name="GetDeviceName"></a>
 **GetDeviceName**
 
-Returns the `EChromaSDKDevice1DEnum` or `EChromaSDKDevice2DEnum` of a `Chroma` 
-animation respective to the `deviceType`, as an integer upon success. Returns 
+Returns the `EChromaSDKDevice1DEnum` or `EChromaSDKDevice2DEnum` of a `Chroma`
+animation respective to the `deviceType`, as an integer upon success. Returns
 -1 upon failure.
 
 ```vb
@@ -3444,7 +3544,7 @@ Dim result As Double = ChromaAnimationAPI.GetDeviceNameD(path As String)
 <a name="GetDeviceType"></a>
 **GetDeviceType**
 
-Returns the `EChromaSDKDeviceTypeEnum` of a `Chroma` animation as an integer 
+Returns the `EChromaSDKDeviceTypeEnum` of a `Chroma` animation as an integer
 upon success. Returns -1 upon failure.
 
 ```vb
@@ -3456,7 +3556,7 @@ Dim result As Integer = ChromaAnimationAPI.GetDeviceType(animationId As Integer)
 <a name="GetDeviceTypeName"></a>
 **GetDeviceTypeName**
 
-Returns the `EChromaSDKDeviceTypeEnum` of a `Chroma` animation as an integer 
+Returns the `EChromaSDKDeviceTypeEnum` of a `Chroma` animation as an integer
 upon success. Returns -1 upon failure.
 
 ```vb
@@ -3479,11 +3579,11 @@ Dim result As Double = ChromaAnimationAPI.GetDeviceTypeNameD(path As String)
 <a name="GetFrame"></a>
 **GetFrame**
 
-Gets the frame colors and duration (in seconds) for a `Chroma` animation. 
-The `color` is expected to be an array of the expected dimensions for the 
-`deviceType/device`. The `length` parameter is the size of the `color` 
-array. For `EChromaSDKDevice1DEnum` the array size should be `MAX LEDS`. 
-For `EChromaSDKDevice2DEnum` the array size should be `MAX ROW` * `MAX 
+Gets the frame colors and duration (in seconds) for a `Chroma` animation.
+The `color` is expected to be an array of the expected dimensions for the
+`deviceType/device`. The `length` parameter is the size of the `color`
+array. For `EChromaSDKDevice1DEnum` the array size should be `MAX LEDS`.
+For `EChromaSDKDevice2DEnum` the array size should be `MAX ROW` * `MAX
 COLUMN`. Returns the animation id upon success. Returns -1 upon failure.
 
 ```vb
@@ -3495,7 +3595,7 @@ Dim result As Integer = ChromaAnimationAPI.GetFrame(animationId As Integer, fram
 <a name="GetFrameCount"></a>
 **GetFrameCount**
 
-Returns the frame count of a `Chroma` animation upon success. Returns -1 
+Returns the frame count of a `Chroma` animation upon success. Returns -1
 upon failure.
 
 ```vb
@@ -3507,7 +3607,7 @@ Dim result As Integer = ChromaAnimationAPI.GetFrameCount(animationId As Integer)
 <a name="GetFrameCountName"></a>
 **GetFrameCountName**
 
-Returns the frame count of a `Chroma` animation upon success. Returns -1 
+Returns the frame count of a `Chroma` animation upon success. Returns -1
 upon failure.
 
 ```vb
@@ -3563,9 +3663,9 @@ Dim result As Integer = ChromaAnimationAPI.GetKeyColorName(path As String, frame
 <a name="GetLibraryLoadedState"></a>
 **GetLibraryLoadedState**
 
-Returns `RZRESULT_SUCCESS` if the plugin has been initialized successfully. 
-Returns `RZRESULT_DLL_NOT_FOUND` if core Chroma library is not found. Returns 
-`RZRESULT_DLL_INVALID_SIGNATURE` if core Chroma library has an invalid 
+Returns `RZRESULT_SUCCESS` if the plugin has been initialized successfully.
+Returns `RZRESULT_DLL_NOT_FOUND` if core Chroma library is not found. Returns
+`RZRESULT_DLL_INVALID_SIGNATURE` if core Chroma library has an invalid
 signature.
 
 ```vb
@@ -3588,7 +3688,7 @@ Dim result As Double = ChromaAnimationAPI.GetLibraryLoadedStateD()
 <a name="GetMaxColumn"></a>
 **GetMaxColumn**
 
-Returns the `MAX COLUMN` given the `EChromaSDKDevice2DEnum` device as an 
+Returns the `MAX COLUMN` given the `EChromaSDKDevice2DEnum` device as an
 integer upon success. Returns -1 upon failure.
 
 ```vb
@@ -3611,7 +3711,7 @@ Dim result As Double = ChromaAnimationAPI.GetMaxColumnD(device As Double)
 <a name="GetMaxLeds"></a>
 **GetMaxLeds**
 
-Returns the MAX LEDS given the `EChromaSDKDevice1DEnum` device as an integer 
+Returns the MAX LEDS given the `EChromaSDKDevice1DEnum` device as an integer
 upon success. Returns -1 upon failure.
 
 ```vb
@@ -3634,7 +3734,7 @@ Dim result As Double = ChromaAnimationAPI.GetMaxLedsD(device As Double)
 <a name="GetMaxRow"></a>
 **GetMaxRow**
 
-Returns the `MAX ROW` given the `EChromaSDKDevice2DEnum` device as an integer 
+Returns the `MAX ROW` given the `EChromaSDKDevice2DEnum` device as an integer
 upon success. Returns -1 upon failure.
 
 ```vb
@@ -3668,9 +3768,9 @@ Dim result As Integer = ChromaAnimationAPI.GetPlayingAnimationCount()
 <a name="GetPlayingAnimationId"></a>
 **GetPlayingAnimationId**
 
-`PluginGetPlayingAnimationId` will return the `animationId` given the `index` 
-of the playing animation. The `index` is zero-based and less than the number 
-returned by `PluginGetPlayingAnimationCount`. Use `PluginGetAnimationName` 
+`PluginGetPlayingAnimationId` will return the `animationId` given the `index`
+of the playing animation. The `index` is zero-based and less than the number
+returned by `PluginGetPlayingAnimationCount`. Use `PluginGetAnimationName`
 to get the name of the animation.
 
 ```vb
@@ -3737,7 +3837,7 @@ Dim result As Double = ChromaAnimationAPI.HasAnimationLoopNameD(path As String)
 <a name="Init"></a>
 **Init**
 
-Initialize the ChromaSDK. Zero indicates  success, otherwise failure. Many 
+Initialize the ChromaSDK. Zero indicates  success, otherwise failure. Many
 API methods auto initialize the ChromaSDK if not already initialized.
 
 ```vb
@@ -3760,8 +3860,8 @@ Dim result As Double = ChromaAnimationAPI.InitD()
 <a name="InitSDK"></a>
 **InitSDK**
 
-Initialize the ChromaSDK. AppInfo populates the details in Synapse. Zero 
-indicates  success, otherwise failure. Many API methods auto initialize 
+Initialize the ChromaSDK. AppInfo populates the details in Synapse. Zero
+indicates  success, otherwise failure. Many API methods auto initialize
 the ChromaSDK if not already initialized.
 
 ```vb
@@ -3773,7 +3873,7 @@ Dim result As Integer = ChromaAnimationAPI.InitSDK(ByRef appInfo As ChromaSDK.AP
 <a name="InsertDelay"></a>
 **InsertDelay**
 
-Insert an animation delay by duplicating the frame by the delay number of 
+Insert an animation delay by duplicating the frame by the delay number of
 times. Animation is referenced by id.
 
 ```vb
@@ -3785,7 +3885,7 @@ ChromaAnimationAPI.InsertDelay(animationId As Integer, frameId As Integer, delay
 <a name="InsertDelayName"></a>
 **InsertDelayName**
 
-Insert an animation delay by duplicating the frame by the delay number of 
+Insert an animation delay by duplicating the frame by the delay number of
 times. Animation is referenced by name.
 
 ```vb
@@ -3808,7 +3908,7 @@ Dim result As Double = ChromaAnimationAPI.InsertDelayNameD(path As String, frame
 <a name="InsertFrame"></a>
 **InsertFrame**
 
-Duplicate the source frame index at the target frame index. Animation is 
+Duplicate the source frame index at the target frame index. Animation is
 referenced by id.
 
 ```vb
@@ -3820,7 +3920,7 @@ ChromaAnimationAPI.InsertFrame(animationId As Integer, sourceFrame As Integer, t
 <a name="InsertFrameName"></a>
 **InsertFrameName**
 
-Duplicate the source frame index at the target frame index. Animation is 
+Duplicate the source frame index at the target frame index. Animation is
 referenced by name.
 
 ```vb
@@ -3843,7 +3943,7 @@ Dim result As Double = ChromaAnimationAPI.InsertFrameNameD(path As String, sourc
 <a name="InvertColors"></a>
 **InvertColors**
 
-Invert all the colors at the specified frame. Animation is referenced by 
+Invert all the colors at the specified frame. Animation is referenced by
 id.
 
 ```vb
@@ -3888,7 +3988,7 @@ Dim result As Double = ChromaAnimationAPI.InvertColorsAllFramesNameD(path As Str
 <a name="InvertColorsName"></a>
 **InvertColorsName**
 
-Invert all the colors at the specified frame. Animation is referenced by 
+Invert all the colors at the specified frame. Animation is referenced by
 name.
 
 ```vb
@@ -3944,7 +4044,7 @@ Dim result As Double = ChromaAnimationAPI.IsAnimationPausedNameD(path As String)
 <a name="IsDialogOpen"></a>
 **IsDialogOpen**
 
-The editor dialog is a non-blocking modal window, this method returns true 
+The editor dialog is a non-blocking modal window, this method returns true
 if the modal window is open, otherwise false.
 
 ```vb
@@ -3967,7 +4067,7 @@ Dim result As Double = ChromaAnimationAPI.IsDialogOpenD()
 <a name="IsInitialized"></a>
 **IsInitialized**
 
-Returns true if the plugin has been initialized. Returns false if the plugin 
+Returns true if the plugin has been initialized. Returns false if the plugin
 is uninitialized.
 
 ```vb
@@ -4012,9 +4112,9 @@ Dim result As Double = ChromaAnimationAPI.IsPlatformSupportedD()
 <a name="IsPlaying"></a>
 **IsPlaying**
 
-`PluginIsPlayingName` automatically handles initializing the `ChromaSDK`. 
-The named `.chroma` animation file will be automatically opened. The method 
-will return whether the animation is playing or not. Animation is referenced 
+`PluginIsPlayingName` automatically handles initializing the `ChromaSDK`.
+The named `.chroma` animation file will be automatically opened. The method
+will return whether the animation is playing or not. Animation is referenced
 by id.
 
 ```vb
@@ -4037,9 +4137,9 @@ Dim result As Double = ChromaAnimationAPI.IsPlayingD(animationId As Double)
 <a name="IsPlayingName"></a>
 **IsPlayingName**
 
-`PluginIsPlayingName` automatically handles initializing the `ChromaSDK`. 
-The named `.chroma` animation file will be automatically opened. The method 
-will return whether the animation is playing or not. Animation is referenced 
+`PluginIsPlayingName` automatically handles initializing the `ChromaSDK`.
+The named `.chroma` animation file will be automatically opened. The method
+will return whether the animation is playing or not. Animation is referenced
 by name.
 
 ```vb
@@ -4062,8 +4162,8 @@ Dim result As Double = ChromaAnimationAPI.IsPlayingNameD(path As String)
 <a name="IsPlayingType"></a>
 **IsPlayingType**
 
-`PluginIsPlayingType` automatically handles initializing the `ChromaSDK`. 
-If any animation is playing for the `deviceType` and `device` combination, 
+`PluginIsPlayingType` automatically handles initializing the `ChromaSDK`.
+If any animation is playing for the `deviceType` and `device` combination,
 the method will return true, otherwise false.
 
 ```vb
@@ -4108,7 +4208,7 @@ Dim result As Integer = ChromaAnimationAPI.LerpColor(from As Integer, renamed_to
 <a name="LoadAnimation"></a>
 **LoadAnimation**
 
-Loads `Chroma` effects so that the animation can be played immediately. 
+Loads `Chroma` effects so that the animation can be played immediately.
 Returns the animation id upon success. Returns -1 upon failure.
 
 ```vb
@@ -4153,8 +4253,8 @@ ChromaAnimationAPI.LoadComposite(name As String)
 <a name="MakeBlankFrames"></a>
 **MakeBlankFrames**
 
-Make a blank animation for the length of the frame count. Frame duration 
-defaults to the duration. The frame color defaults to color. Animation 
+Make a blank animation for the length of the frame count. Frame duration
+defaults to the duration. The frame color defaults to color. Animation
 is referenced by id.
 
 ```vb
@@ -4166,8 +4266,8 @@ ChromaAnimationAPI.MakeBlankFrames(animationId As Integer, frameCount As Integer
 <a name="MakeBlankFramesName"></a>
 **MakeBlankFramesName**
 
-Make a blank animation for the length of the frame count. Frame duration 
-defaults to the duration. The frame color defaults to color. Animation 
+Make a blank animation for the length of the frame count. Frame duration
+defaults to the duration. The frame color defaults to color. Animation
 is referenced by name.
 
 ```vb
@@ -4190,8 +4290,8 @@ Dim result As Double = ChromaAnimationAPI.MakeBlankFramesNameD(path As String, f
 <a name="MakeBlankFramesRandom"></a>
 **MakeBlankFramesRandom**
 
-Make a blank animation for the length of the frame count. Frame duration 
-defaults to the duration. The frame color is random. Animation is referenced 
+Make a blank animation for the length of the frame count. Frame duration
+defaults to the duration. The frame color is random. Animation is referenced
 by id.
 
 ```vb
@@ -4203,8 +4303,8 @@ ChromaAnimationAPI.MakeBlankFramesRandom(animationId As Integer, frameCount As I
 <a name="MakeBlankFramesRandomBlackAndWhite"></a>
 **MakeBlankFramesRandomBlackAndWhite**
 
-Make a blank animation for the length of the frame count. Frame duration 
-defaults to the duration. The frame color is random black and white. Animation 
+Make a blank animation for the length of the frame count. Frame duration
+defaults to the duration. The frame color is random black and white. Animation
 is referenced by id.
 
 ```vb
@@ -4216,8 +4316,8 @@ ChromaAnimationAPI.MakeBlankFramesRandomBlackAndWhite(animationId As Integer, fr
 <a name="MakeBlankFramesRandomBlackAndWhiteName"></a>
 **MakeBlankFramesRandomBlackAndWhiteName**
 
-Make a blank animation for the length of the frame count. Frame duration 
-defaults to the duration. The frame color is random black and white. Animation 
+Make a blank animation for the length of the frame count. Frame duration
+defaults to the duration. The frame color is random black and white. Animation
 is referenced by name.
 
 ```vb
@@ -4240,8 +4340,8 @@ Dim result As Double = ChromaAnimationAPI.MakeBlankFramesRandomBlackAndWhiteName
 <a name="MakeBlankFramesRandomName"></a>
 **MakeBlankFramesRandomName**
 
-Make a blank animation for the length of the frame count. Frame duration 
-defaults to the duration. The frame color is random. Animation is referenced 
+Make a blank animation for the length of the frame count. Frame duration
+defaults to the duration. The frame color is random. Animation is referenced
 by name.
 
 ```vb
@@ -4264,8 +4364,8 @@ Dim result As Double = ChromaAnimationAPI.MakeBlankFramesRandomNameD(path As Str
 <a name="MakeBlankFramesRGB"></a>
 **MakeBlankFramesRGB**
 
-Make a blank animation for the length of the frame count. Frame duration 
-defaults to the duration. The frame color defaults to color. Animation 
+Make a blank animation for the length of the frame count. Frame duration
+defaults to the duration. The frame color defaults to color. Animation
 is referenced by id.
 
 ```vb
@@ -4277,8 +4377,8 @@ ChromaAnimationAPI.MakeBlankFramesRGB(animationId As Integer, frameCount As Inte
 <a name="MakeBlankFramesRGBName"></a>
 **MakeBlankFramesRGBName**
 
-Make a blank animation for the length of the frame count. Frame duration 
-defaults to the duration. The frame color defaults to color. Animation 
+Make a blank animation for the length of the frame count. Frame duration
+defaults to the duration. The frame color defaults to color. Animation
 is referenced by name.
 
 ```vb
@@ -4301,7 +4401,7 @@ Dim result As Double = ChromaAnimationAPI.MakeBlankFramesRGBNameD(path As String
 <a name="MirrorHorizontally"></a>
 **MirrorHorizontally**
 
-Flips the color grid horizontally for all `Chroma` animation frames. Returns 
+Flips the color grid horizontally for all `Chroma` animation frames. Returns
 the animation id upon success. Returns -1 upon failure.
 
 ```vb
@@ -4313,8 +4413,8 @@ Dim result As Integer = ChromaAnimationAPI.MirrorHorizontally(animationId As Int
 <a name="MirrorVertically"></a>
 **MirrorVertically**
 
-Flips the color grid vertically for all `Chroma` animation frames. This 
-method has no effect for `EChromaSDKDevice1DEnum` devices. Returns the 
+Flips the color grid vertically for all `Chroma` animation frames. This
+method has no effect for `EChromaSDKDevice1DEnum` devices. Returns the
 animation id upon success. Returns -1 upon failure.
 
 ```vb
@@ -4326,8 +4426,8 @@ Dim result As Integer = ChromaAnimationAPI.MirrorVertically(animationId As Integ
 <a name="MultiplyColorLerpAllFrames"></a>
 **MultiplyColorLerpAllFrames**
 
-Multiply the color intensity with the lerp result from color 1 to color 
-2 using the frame index divided by the frame count for the `t` parameter. 
+Multiply the color intensity with the lerp result from color 1 to color
+2 using the frame index divided by the frame count for the `t` parameter.
 Animation is referenced in id.
 
 ```vb
@@ -4339,8 +4439,8 @@ ChromaAnimationAPI.MultiplyColorLerpAllFrames(animationId As Integer, color1 As 
 <a name="MultiplyColorLerpAllFramesName"></a>
 **MultiplyColorLerpAllFramesName**
 
-Multiply the color intensity with the lerp result from color 1 to color 
-2 using the frame index divided by the frame count for the `t` parameter. 
+Multiply the color intensity with the lerp result from color 1 to color
+2 using the frame index divided by the frame count for the `t` parameter.
 Animation is referenced in name.
 
 ```vb
@@ -4363,9 +4463,9 @@ Dim result As Double = ChromaAnimationAPI.MultiplyColorLerpAllFramesNameD(path A
 <a name="MultiplyIntensity"></a>
 **MultiplyIntensity**
 
-Multiply all the colors in the frame by the intensity value. The valid the 
-intensity range is from 0.0 to 255.0. RGB components are multiplied equally. 
-An intensity of 0.5 would half the color value. Black colors in the frame 
+Multiply all the colors in the frame by the intensity value. The valid the
+intensity range is from 0.0 to 255.0. RGB components are multiplied equally.
+An intensity of 0.5 would half the color value. Black colors in the frame
 will not be affected by this method.
 
 ```vb
@@ -4377,9 +4477,9 @@ ChromaAnimationAPI.MultiplyIntensity(animationId As Integer, frameId As Integer,
 <a name="MultiplyIntensityAllFrames"></a>
 **MultiplyIntensityAllFrames**
 
-Multiply all the colors for all frames by the intensity value. The valid 
-the intensity range is from 0.0 to 255.0. RGB components are multiplied 
-equally. An intensity of 0.5 would half the color value. Black colors in 
+Multiply all the colors for all frames by the intensity value. The valid
+the intensity range is from 0.0 to 255.0. RGB components are multiplied
+equally. An intensity of 0.5 would half the color value. Black colors in
 the frame will not be affected by this method.
 
 ```vb
@@ -4391,9 +4491,9 @@ ChromaAnimationAPI.MultiplyIntensityAllFrames(animationId As Integer, intensity 
 <a name="MultiplyIntensityAllFramesName"></a>
 **MultiplyIntensityAllFramesName**
 
-Multiply all the colors for all frames by the intensity value. The valid 
-the intensity range is from 0.0 to 255.0. RGB components are multiplied 
-equally. An intensity of 0.5 would half the color value. Black colors in 
+Multiply all the colors for all frames by the intensity value. The valid
+the intensity range is from 0.0 to 255.0. RGB components are multiplied
+equally. An intensity of 0.5 would half the color value. Black colors in
 the frame will not be affected by this method.
 
 ```vb
@@ -4416,7 +4516,7 @@ Dim result As Double = ChromaAnimationAPI.MultiplyIntensityAllFramesNameD(path A
 <a name="MultiplyIntensityAllFramesRGB"></a>
 **MultiplyIntensityAllFramesRGB**
 
-Multiply all frames by the RBG color intensity. Animation is referenced 
+Multiply all frames by the RBG color intensity. Animation is referenced
 by id.
 
 ```vb
@@ -4428,7 +4528,7 @@ ChromaAnimationAPI.MultiplyIntensityAllFramesRGB(animationId As Integer, red As 
 <a name="MultiplyIntensityAllFramesRGBName"></a>
 **MultiplyIntensityAllFramesRGBName**
 
-Multiply all frames by the RBG color intensity. Animation is referenced 
+Multiply all frames by the RBG color intensity. Animation is referenced
 by name.
 
 ```vb
@@ -4451,7 +4551,7 @@ Dim result As Double = ChromaAnimationAPI.MultiplyIntensityAllFramesRGBNameD(pat
 <a name="MultiplyIntensityColor"></a>
 **MultiplyIntensityColor**
 
-Multiply the specific frame by the RBG color intensity. Animation is referenced 
+Multiply the specific frame by the RBG color intensity. Animation is referenced
 by id.
 
 ```vb
@@ -4463,7 +4563,7 @@ ChromaAnimationAPI.MultiplyIntensityColor(animationId As Integer, frameId As Int
 <a name="MultiplyIntensityColorAllFrames"></a>
 **MultiplyIntensityColorAllFrames**
 
-Multiply all frames by the RBG color intensity. Animation is referenced 
+Multiply all frames by the RBG color intensity. Animation is referenced
 by id.
 
 ```vb
@@ -4475,7 +4575,7 @@ ChromaAnimationAPI.MultiplyIntensityColorAllFrames(animationId As Integer, color
 <a name="MultiplyIntensityColorAllFramesName"></a>
 **MultiplyIntensityColorAllFramesName**
 
-Multiply all frames by the RBG color intensity. Animation is referenced 
+Multiply all frames by the RBG color intensity. Animation is referenced
 by name.
 
 ```vb
@@ -4498,7 +4598,7 @@ Dim result As Double = ChromaAnimationAPI.MultiplyIntensityColorAllFramesNameD(p
 <a name="MultiplyIntensityColorName"></a>
 **MultiplyIntensityColorName**
 
-Multiply the specific frame by the RBG color intensity. Animation is referenced 
+Multiply the specific frame by the RBG color intensity. Animation is referenced
 by name.
 
 ```vb
@@ -4521,9 +4621,9 @@ Dim result As Double = ChromaAnimationAPI.MultiplyIntensityColorNameD(path As St
 <a name="MultiplyIntensityName"></a>
 **MultiplyIntensityName**
 
-Multiply all the colors in the frame by the intensity value. The valid the 
-intensity range is from 0.0 to 255.0. RGB components are multiplied equally. 
-An intensity of 0.5 would half the color value. Black colors in the frame 
+Multiply all the colors in the frame by the intensity value. The valid the
+intensity range is from 0.0 to 255.0. RGB components are multiplied equally.
+An intensity of 0.5 would half the color value. Black colors in the frame
 will not be affected by this method.
 
 ```vb
@@ -4546,7 +4646,7 @@ Dim result As Double = ChromaAnimationAPI.MultiplyIntensityNameD(path As String,
 <a name="MultiplyIntensityRGB"></a>
 **MultiplyIntensityRGB**
 
-Multiply the specific frame by the RBG color intensity. Animation is referenced 
+Multiply the specific frame by the RBG color intensity. Animation is referenced
 by id.
 
 ```vb
@@ -4558,7 +4658,7 @@ ChromaAnimationAPI.MultiplyIntensityRGB(animationId As Integer, frameId As Integ
 <a name="MultiplyIntensityRGBName"></a>
 **MultiplyIntensityRGBName**
 
-Multiply the specific frame by the RBG color intensity. Animation is referenced 
+Multiply the specific frame by the RBG color intensity. Animation is referenced
 by name.
 
 ```vb
@@ -4581,8 +4681,8 @@ Dim result As Double = ChromaAnimationAPI.MultiplyIntensityRGBNameD(path As Stri
 <a name="MultiplyNonZeroTargetColorLerp"></a>
 **MultiplyNonZeroTargetColorLerp**
 
-Multiply the specific frame by the color lerp result between color 1 and 
-2 using the frame color value as the `t` value. Animation is referenced 
+Multiply the specific frame by the color lerp result between color 1 and
+2 using the frame color value as the `t` value. Animation is referenced
 by id.
 
 ```vb
@@ -4594,7 +4694,7 @@ ChromaAnimationAPI.MultiplyNonZeroTargetColorLerp(animationId As Integer, frameI
 <a name="MultiplyNonZeroTargetColorLerpAllFrames"></a>
 **MultiplyNonZeroTargetColorLerpAllFrames**
 
-Multiply all frames by the color lerp result between color 1 and 2 using 
+Multiply all frames by the color lerp result between color 1 and 2 using
 the frame color value as the `t` value. Animation is referenced by id.
 
 ```vb
@@ -4606,7 +4706,7 @@ ChromaAnimationAPI.MultiplyNonZeroTargetColorLerpAllFrames(animationId As Intege
 <a name="MultiplyNonZeroTargetColorLerpAllFramesName"></a>
 **MultiplyNonZeroTargetColorLerpAllFramesName**
 
-Multiply all frames by the color lerp result between color 1 and 2 using 
+Multiply all frames by the color lerp result between color 1 and 2 using
 the frame color value as the `t` value. Animation is referenced by name.
 
 ```vb
@@ -4629,8 +4729,8 @@ Dim result As Double = ChromaAnimationAPI.MultiplyNonZeroTargetColorLerpAllFrame
 <a name="MultiplyNonZeroTargetColorLerpAllFramesRGB"></a>
 **MultiplyNonZeroTargetColorLerpAllFramesRGB**
 
-Multiply the specific frame by the color lerp result between RGB 1 and 2 
-using the frame color value as the `t` value. Animation is referenced by 
+Multiply the specific frame by the color lerp result between RGB 1 and 2
+using the frame color value as the `t` value. Animation is referenced by
 id.
 
 ```vb
@@ -4642,8 +4742,8 @@ ChromaAnimationAPI.MultiplyNonZeroTargetColorLerpAllFramesRGB(animationId As Int
 <a name="MultiplyNonZeroTargetColorLerpAllFramesRGBName"></a>
 **MultiplyNonZeroTargetColorLerpAllFramesRGBName**
 
-Multiply the specific frame by the color lerp result between RGB 1 and 2 
-using the frame color value as the `t` value. Animation is referenced by 
+Multiply the specific frame by the color lerp result between RGB 1 and 2
+using the frame color value as the `t` value. Animation is referenced by
 name.
 
 ```vb
@@ -4666,8 +4766,8 @@ Dim result As Double = ChromaAnimationAPI.MultiplyNonZeroTargetColorLerpAllFrame
 <a name="MultiplyTargetColorLerp"></a>
 **MultiplyTargetColorLerp**
 
-Multiply the specific frame by the color lerp result between color 1 and 
-2 using the frame color value as the `t` value. Animation is referenced 
+Multiply the specific frame by the color lerp result between color 1 and
+2 using the frame color value as the `t` value. Animation is referenced
 by id.
 
 ```vb
@@ -4679,7 +4779,7 @@ ChromaAnimationAPI.MultiplyTargetColorLerp(animationId As Integer, frameId As In
 <a name="MultiplyTargetColorLerpAllFrames"></a>
 **MultiplyTargetColorLerpAllFrames**
 
-Multiply all frames by the color lerp result between color 1 and 2 using 
+Multiply all frames by the color lerp result between color 1 and 2 using
 the frame color value as the `t` value. Animation is referenced by id.
 
 ```vb
@@ -4691,7 +4791,7 @@ ChromaAnimationAPI.MultiplyTargetColorLerpAllFrames(animationId As Integer, colo
 <a name="MultiplyTargetColorLerpAllFramesName"></a>
 **MultiplyTargetColorLerpAllFramesName**
 
-Multiply all frames by the color lerp result between color 1 and 2 using 
+Multiply all frames by the color lerp result between color 1 and 2 using
 the frame color value as the `t` value. Animation is referenced by name.
 
 ```vb
@@ -4714,7 +4814,7 @@ Dim result As Double = ChromaAnimationAPI.MultiplyTargetColorLerpAllFramesNameD(
 <a name="MultiplyTargetColorLerpAllFramesRGB"></a>
 **MultiplyTargetColorLerpAllFramesRGB**
 
-Multiply all frames by the color lerp result between RGB 1 and 2 using the 
+Multiply all frames by the color lerp result between RGB 1 and 2 using the
 frame color value as the `t` value. Animation is referenced by id.
 
 ```vb
@@ -4726,7 +4826,7 @@ ChromaAnimationAPI.MultiplyTargetColorLerpAllFramesRGB(animationId As Integer, r
 <a name="MultiplyTargetColorLerpAllFramesRGBName"></a>
 **MultiplyTargetColorLerpAllFramesRGBName**
 
-Multiply all frames by the color lerp result between RGB 1 and 2 using the 
+Multiply all frames by the color lerp result between RGB 1 and 2 using the
 frame color value as the `t` value. Animation is referenced by name.
 
 ```vb
@@ -4749,8 +4849,8 @@ Dim result As Double = ChromaAnimationAPI.MultiplyTargetColorLerpAllFramesRGBNam
 <a name="MultiplyTargetColorLerpName"></a>
 **MultiplyTargetColorLerpName**
 
-Multiply the specific frame by the color lerp result between color 1 and 
-2 using the frame color value as the `t` value. Animation is referenced 
+Multiply the specific frame by the color lerp result between color 1 and
+2 using the frame color value as the `t` value. Animation is referenced
 by name.
 
 ```vb
@@ -4762,8 +4862,8 @@ ChromaAnimationAPI.MultiplyTargetColorLerpName(path As String, frameId As Intege
 <a name="OffsetColors"></a>
 **OffsetColors**
 
-Offset all colors in the frame using the RGB offset. Use the range of -255 
-to 255 for red, green, and blue parameters. Negative values remove color. 
+Offset all colors in the frame using the RGB offset. Use the range of -255
+to 255 for red, green, and blue parameters. Negative values remove color.
 Positive values add color.
 
 ```vb
@@ -4775,8 +4875,8 @@ ChromaAnimationAPI.OffsetColors(animationId As Integer, frameId As Integer, red 
 <a name="OffsetColorsAllFrames"></a>
 **OffsetColorsAllFrames**
 
-Offset all colors for all frames using the RGB offset. Use the range of 
--255 to 255 for red, green, and blue parameters. Negative values remove 
+Offset all colors for all frames using the RGB offset. Use the range of
+-255 to 255 for red, green, and blue parameters. Negative values remove
 color. Positive values add color.
 
 ```vb
@@ -4788,8 +4888,8 @@ ChromaAnimationAPI.OffsetColorsAllFrames(animationId As Integer, red As Integer,
 <a name="OffsetColorsAllFramesName"></a>
 **OffsetColorsAllFramesName**
 
-Offset all colors for all frames using the RGB offset. Use the range of 
--255 to 255 for red, green, and blue parameters. Negative values remove 
+Offset all colors for all frames using the RGB offset. Use the range of
+-255 to 255 for red, green, and blue parameters. Negative values remove
 color. Positive values add color.
 
 ```vb
@@ -4812,8 +4912,8 @@ Dim result As Double = ChromaAnimationAPI.OffsetColorsAllFramesNameD(path As Str
 <a name="OffsetColorsName"></a>
 **OffsetColorsName**
 
-Offset all colors in the frame using the RGB offset. Use the range of -255 
-to 255 for red, green, and blue parameters. Negative values remove color. 
+Offset all colors in the frame using the RGB offset. Use the range of -255
+to 255 for red, green, and blue parameters. Negative values remove color.
 Positive values add color.
 
 ```vb
@@ -4836,9 +4936,9 @@ Dim result As Double = ChromaAnimationAPI.OffsetColorsNameD(path As String, fram
 <a name="OffsetNonZeroColors"></a>
 **OffsetNonZeroColors**
 
-This method will only update colors in the animation that are not already 
-set to black. Offset a subset of colors in the frame using the RGB offset. 
-Use the range of -255 to 255 for red, green, and blue parameters. Negative 
+This method will only update colors in the animation that are not already
+set to black. Offset a subset of colors in the frame using the RGB offset.
+Use the range of -255 to 255 for red, green, and blue parameters. Negative
 values remove color. Positive values add color.
 
 ```vb
@@ -4850,9 +4950,9 @@ ChromaAnimationAPI.OffsetNonZeroColors(animationId As Integer, frameId As Intege
 <a name="OffsetNonZeroColorsAllFrames"></a>
 **OffsetNonZeroColorsAllFrames**
 
-This method will only update colors in the animation that are not already 
-set to black. Offset a subset of colors for all frames using the RGB offset. 
-Use the range of -255 to 255 for red, green, and blue parameters. Negative 
+This method will only update colors in the animation that are not already
+set to black. Offset a subset of colors for all frames using the RGB offset.
+Use the range of -255 to 255 for red, green, and blue parameters. Negative
 values remove color. Positive values add color.
 
 ```vb
@@ -4864,9 +4964,9 @@ ChromaAnimationAPI.OffsetNonZeroColorsAllFrames(animationId As Integer, red As I
 <a name="OffsetNonZeroColorsAllFramesName"></a>
 **OffsetNonZeroColorsAllFramesName**
 
-This method will only update colors in the animation that are not already 
-set to black. Offset a subset of colors for all frames using the RGB offset. 
-Use the range of -255 to 255 for red, green, and blue parameters. Negative 
+This method will only update colors in the animation that are not already
+set to black. Offset a subset of colors for all frames using the RGB offset.
+Use the range of -255 to 255 for red, green, and blue parameters. Negative
 values remove color. Positive values add color.
 
 ```vb
@@ -4889,9 +4989,9 @@ Dim result As Double = ChromaAnimationAPI.OffsetNonZeroColorsAllFramesNameD(path
 <a name="OffsetNonZeroColorsName"></a>
 **OffsetNonZeroColorsName**
 
-This method will only update colors in the animation that are not already 
-set to black. Offset a subset of colors in the frame using the RGB offset. 
-Use the range of -255 to 255 for red, green, and blue parameters. Negative 
+This method will only update colors in the animation that are not already
+set to black. Offset a subset of colors in the frame using the RGB offset.
+Use the range of -255 to 255 for red, green, and blue parameters. Negative
 values remove color. Positive values add color.
 
 ```vb
@@ -4914,8 +5014,8 @@ Dim result As Double = ChromaAnimationAPI.OffsetNonZeroColorsNameD(path As Strin
 <a name="OpenAnimation"></a>
 **OpenAnimation**
 
-Opens a `Chroma` animation file so that it can be played. Returns an animation 
-id >= 0 upon success. Returns -1 if there was a failure. The animation 
+Opens a `Chroma` animation file so that it can be played. Returns an animation
+id >= 0 upon success. Returns -1 if there was a failure. The animation
 id is used in most of the API methods.
 
 ```vb
@@ -4938,10 +5038,10 @@ Dim result As Double = ChromaAnimationAPI.OpenAnimationD(path As String)
 <a name="OpenAnimationFromMemory"></a>
 **OpenAnimationFromMemory**
 
-Opens a `Chroma` animation data from memory so that it can be played. `Data` 
-is a pointer to byte array of the loaded animation in memory. `Name` will 
-be assigned to the animation when loaded. Returns an animation id >= 0 
-upon success. Returns -1 if there was a failure. The animation id is used 
+Opens a `Chroma` animation data from memory so that it can be played. `Data`
+is a pointer to byte array of the loaded animation in memory. `Name` will
+be assigned to the animation when loaded. Returns an animation id >= 0
+upon success. Returns -1 if there was a failure. The animation id is used
 in most of the API methods.
 
 ```vb
@@ -4953,7 +5053,7 @@ Dim result As Integer = ChromaAnimationAPI.OpenAnimationFromMemory(data As Byte(
 <a name="OpenEditorDialog"></a>
 **OpenEditorDialog**
 
-Opens a `Chroma` animation file with the `.chroma` extension. Returns zero 
+Opens a `Chroma` animation file with the `.chroma` extension. Returns zero
 upon success. Returns -1 if there was a failure.
 
 ```vb
@@ -4965,7 +5065,7 @@ Dim result As Integer = ChromaAnimationAPI.OpenEditorDialog(path As String)
 <a name="OpenEditorDialogAndPlay"></a>
 **OpenEditorDialogAndPlay**
 
-Open the named animation in the editor dialog and play the animation at 
+Open the named animation in the editor dialog and play the animation at
 start.
 
 ```vb
@@ -4999,7 +5099,7 @@ Dim result As Double = ChromaAnimationAPI.OpenEditorDialogD(path As String)
 <a name="OverrideFrameDuration"></a>
 **OverrideFrameDuration**
 
-Sets the `duration` for all grames in the `Chroma` animation to the `duration` 
+Sets the `duration` for all grames in the `Chroma` animation to the `duration`
 parameter. Returns the animation id upon success. Returns -1 upon failure.
 
 ```vb
@@ -5022,7 +5122,7 @@ Dim result As Double = ChromaAnimationAPI.OverrideFrameDurationD(animationId As 
 <a name="OverrideFrameDurationName"></a>
 **OverrideFrameDurationName**
 
-Override the duration of all frames with the `duration` value. Animation 
+Override the duration of all frames with the `duration` value. Animation
 is referenced by name.
 
 ```vb
@@ -5067,7 +5167,7 @@ Dim result As Double = ChromaAnimationAPI.PauseAnimationNameD(path As String)
 <a name="PlayAnimation"></a>
 **PlayAnimation**
 
-Plays the `Chroma` animation. This will load the animation, if not loaded 
+Plays the `Chroma` animation. This will load the animation, if not loaded
 previously. Returns the animation id upon success. Returns -1 upon failure.
 
 ```vb
@@ -5090,8 +5190,8 @@ Dim result As Double = ChromaAnimationAPI.PlayAnimationD(animationId As Double)
 <a name="PlayAnimationFrame"></a>
 **PlayAnimationFrame**
 
-`PluginPlayAnimationFrame` automatically handles initializing the `ChromaSDK`. 
-The method will play the animation given the `animationId` with looping 
+`PluginPlayAnimationFrame` automatically handles initializing the `ChromaSDK`.
+The method will play the animation given the `animationId` with looping
 `on` or `off` starting at the `frameId`.
 
 ```vb
@@ -5103,8 +5203,8 @@ ChromaAnimationAPI.PlayAnimationFrame(animationId As Integer, frameId As Integer
 <a name="PlayAnimationFrameName"></a>
 **PlayAnimationFrameName**
 
-`PluginPlayAnimationFrameName` automatically handles initializing the `ChromaSDK`. 
-The named `.chroma` animation file will be automatically opened. The animation 
+`PluginPlayAnimationFrameName` automatically handles initializing the `ChromaSDK`.
+The named `.chroma` animation file will be automatically opened. The animation
 will play with looping `on` or `off` starting at the `frameId`.
 
 ```vb
@@ -5127,8 +5227,8 @@ Dim result As Double = ChromaAnimationAPI.PlayAnimationFrameNameD(path As String
 <a name="PlayAnimationLoop"></a>
 **PlayAnimationLoop**
 
-`PluginPlayAnimationLoop` automatically handles initializing the `ChromaSDK`. 
-The method will play the animation given the `animationId` with looping 
+`PluginPlayAnimationLoop` automatically handles initializing the `ChromaSDK`.
+The method will play the animation given the `animationId` with looping
 `on` or `off`.
 
 ```vb
@@ -5140,8 +5240,8 @@ ChromaAnimationAPI.PlayAnimationLoop(animationId As Integer, renamed_loop As Boo
 <a name="PlayAnimationName"></a>
 **PlayAnimationName**
 
-`PluginPlayAnimationName` automatically handles initializing the `ChromaSDK`. 
-The named `.chroma` animation file will be automatically opened. The animation 
+`PluginPlayAnimationName` automatically handles initializing the `ChromaSDK`.
+The named `.chroma` animation file will be automatically opened. The animation
 will play with looping `on` or `off`.
 
 ```vb
@@ -5164,8 +5264,8 @@ Dim result As Double = ChromaAnimationAPI.PlayAnimationNameD(path As String, ren
 <a name="PlayComposite"></a>
 **PlayComposite**
 
-`PluginPlayComposite` automatically handles initializing the `ChromaSDK`. 
-The named animation files for the `.chroma` set will be automatically opened. 
+`PluginPlayComposite` automatically handles initializing the `ChromaSDK`.
+The named animation files for the `.chroma` set will be automatically opened.
 The set of animations will play with looping `on` or `off`.
 
 ```vb
@@ -5188,7 +5288,7 @@ Dim result As Double = ChromaAnimationAPI.PlayCompositeD(name As String, renamed
 <a name="PreviewFrame"></a>
 **PreviewFrame**
 
-Displays the `Chroma` animation frame on `Chroma` hardware given the `frameIndex`. 
+Displays the `Chroma` animation frame on `Chroma` hardware given the `frameIndex`.
 Returns the animation id upon success. Returns -1 upon failure.
 
 ```vb
@@ -5211,7 +5311,7 @@ Dim result As Double = ChromaAnimationAPI.PreviewFrameD(animationId As Double, f
 <a name="PreviewFrameName"></a>
 **PreviewFrameName**
 
-Displays the `Chroma` animation frame on `Chroma` hardware given the `frameIndex`. 
+Displays the `Chroma` animation frame on `Chroma` hardware given the `frameIndex`.
 Animaton is referenced by name.
 
 ```vb
@@ -5223,7 +5323,7 @@ ChromaAnimationAPI.PreviewFrameName(path As String, frameIndex As Integer)
 <a name="ReduceFrames"></a>
 **ReduceFrames**
 
-Reduce the frames of the animation by removing every nth element. Animation 
+Reduce the frames of the animation by removing every nth element. Animation
 is referenced by id.
 
 ```vb
@@ -5235,7 +5335,7 @@ ChromaAnimationAPI.ReduceFrames(animationId As Integer, n As Integer)
 <a name="ReduceFramesName"></a>
 **ReduceFramesName**
 
-Reduce the frames of the animation by removing every nth element. Animation 
+Reduce the frames of the animation by removing every nth element. Animation
 is referenced by name.
 
 ```vb
@@ -5258,7 +5358,7 @@ Dim result As Double = ChromaAnimationAPI.ReduceFramesNameD(path As String, n As
 <a name="ResetAnimation"></a>
 **ResetAnimation**
 
-Resets the `Chroma` animation to 1 blank frame. Returns the animation id 
+Resets the `Chroma` animation to 1 blank frame. Returns the animation id
 upon success. Returns -1 upon failure.
 
 ```vb
@@ -5303,8 +5403,8 @@ Dim result As Double = ChromaAnimationAPI.ResumeAnimationNameD(path As String, r
 <a name="Reverse"></a>
 **Reverse**
 
-Reverse the animation frame order of the `Chroma` animation. Returns the 
-animation id upon success. Returns -1 upon failure. Animation is referenced 
+Reverse the animation frame order of the `Chroma` animation. Returns the
+animation id upon success. Returns -1 upon failure. Animation is referenced
 by id.
 
 ```vb
@@ -5316,7 +5416,7 @@ Dim result As Integer = ChromaAnimationAPI.Reverse(animationId As Integer)
 <a name="ReverseAllFrames"></a>
 **ReverseAllFrames**
 
-Reverse the animation frame order of the `Chroma` animation. Animation is 
+Reverse the animation frame order of the `Chroma` animation. Animation is
 referenced by id.
 
 ```vb
@@ -5328,7 +5428,7 @@ ChromaAnimationAPI.ReverseAllFrames(animationId As Integer)
 <a name="ReverseAllFramesName"></a>
 **ReverseAllFramesName**
 
-Reverse the animation frame order of the `Chroma` animation. Animation is 
+Reverse the animation frame order of the `Chroma` animation. Animation is
 referenced by name.
 
 ```vb
@@ -5373,8 +5473,8 @@ Dim result As Integer = ChromaAnimationAPI.SaveAnimationName(sourceAnimation As 
 <a name="Set1DColor"></a>
 **Set1DColor**
 
-Set the animation color for a frame given the `1D` `led`. The `led` should 
-be greater than or equal to 0 and less than the `MaxLeds`. The animation 
+Set the animation color for a frame given the `1D` `led`. The `led` should
+be greater than or equal to 0 and less than the `MaxLeds`. The animation
 is referenced by id.
 
 ```vb
@@ -5386,8 +5486,8 @@ ChromaAnimationAPI.Set1DColor(animationId As Integer, frameId As Integer, led As
 <a name="Set1DColorName"></a>
 **Set1DColorName**
 
-Set the animation color for a frame given the `1D` `led`. The `led` should 
-be greater than or equal to 0 and less than the `MaxLeds`. The animation 
+Set the animation color for a frame given the `1D` `led`. The `led` should
+be greater than or equal to 0 and less than the `MaxLeds`. The animation
 is referenced by name.
 
 ```vb
@@ -5410,9 +5510,9 @@ Dim result As Double = ChromaAnimationAPI.Set1DColorNameD(path As String, frameI
 <a name="Set2DColor"></a>
 **Set2DColor**
 
-Set the animation color for a frame given the `2D` `row` and `column`. The 
-`row` should be greater than or equal to 0 and less than the `MaxRow`. 
-The `column` should be greater than or equal to 0 and less than the `MaxColumn`. 
+Set the animation color for a frame given the `2D` `row` and `column`. The
+`row` should be greater than or equal to 0 and less than the `MaxRow`.
+The `column` should be greater than or equal to 0 and less than the `MaxColumn`.
 The animation is referenced by id.
 
 ```vb
@@ -5424,9 +5524,9 @@ ChromaAnimationAPI.Set2DColor(animationId As Integer, frameId As Integer, row As
 <a name="Set2DColorName"></a>
 **Set2DColorName**
 
-Set the animation color for a frame given the `2D` `row` and `column`. The 
-`row` should be greater than or equal to 0 and less than the `MaxRow`. 
-The `column` should be greater than or equal to 0 and less than the `MaxColumn`. 
+Set the animation color for a frame given the `2D` `row` and `column`. The
+`row` should be greater than or equal to 0 and less than the `MaxRow`.
+The `column` should be greater than or equal to 0 and less than the `MaxColumn`.
 The animation is referenced by name.
 
 ```vb
@@ -5449,7 +5549,7 @@ Dim result As Double = ChromaAnimationAPI.Set2DColorNameD(path As String, frameI
 <a name="SetChromaCustomColorAllFrames"></a>
 **SetChromaCustomColorAllFrames**
 
-When custom color is set, the custom key mode will be used. The animation 
+When custom color is set, the custom key mode will be used. The animation
 is referenced by id.
 
 ```vb
@@ -5461,7 +5561,7 @@ ChromaAnimationAPI.SetChromaCustomColorAllFrames(animationId As Integer)
 <a name="SetChromaCustomColorAllFramesName"></a>
 **SetChromaCustomColorAllFramesName**
 
-When custom color is set, the custom key mode will be used. The animation 
+When custom color is set, the custom key mode will be used. The animation
 is referenced by name.
 
 ```vb
@@ -5484,8 +5584,8 @@ Dim result As Double = ChromaAnimationAPI.SetChromaCustomColorAllFramesNameD(pat
 <a name="SetChromaCustomFlag"></a>
 **SetChromaCustomFlag**
 
-Set the Chroma custom key color flag on all frames. `True` changes the layout 
-from grid to key. `True` changes the layout from key to grid. Animation 
+Set the Chroma custom key color flag on all frames. `True` changes the layout
+from grid to key. `True` changes the layout from key to grid. Animation
 is referenced by id.
 
 ```vb
@@ -5497,8 +5597,8 @@ ChromaAnimationAPI.SetChromaCustomFlag(animationId As Integer, flag As Boolean)
 <a name="SetChromaCustomFlagName"></a>
 **SetChromaCustomFlagName**
 
-Set the Chroma custom key color flag on all frames. `True` changes the layout 
-from grid to key. `True` changes the layout from key to grid. Animation 
+Set the Chroma custom key color flag on all frames. `True` changes the layout
+from grid to key. `True` changes the layout from key to grid. Animation
 is referenced by name.
 
 ```vb
@@ -5565,8 +5665,8 @@ Dim result As Integer = ChromaAnimationAPI.SetCustomColorFlag2D(device As Intege
 <a name="SetDevice"></a>
 **SetDevice**
 
-Changes the `deviceType` and `device` of a `Chroma` animation. If the device 
-is changed, the `Chroma` animation will be reset with 1 blank frame. Returns 
+Changes the `deviceType` and `device` of a `Chroma` animation. If the device
+is changed, the `Chroma` animation will be reset with 1 blank frame. Returns
 the animation id upon success. Returns -1 upon failure.
 
 ```vb
@@ -5611,7 +5711,7 @@ Dim result As Integer = ChromaAnimationAPI.SetEffectCustom2D(device As Integer, 
 <a name="SetEffectKeyboardCustom2D"></a>
 **SetEffectKeyboardCustom2D**
 
-SetEffectKeyboardCustom2D will display the referenced custom keyboard colors 
+SetEffectKeyboardCustom2D will display the referenced custom keyboard colors
 immediately
 
 ```vb
@@ -5623,7 +5723,7 @@ Dim result As Integer = ChromaAnimationAPI.SetEffectKeyboardCustom2D(device As I
 <a name="SetIdleAnimation"></a>
 **SetIdleAnimation**
 
-When the idle animation is used, the named animation will play when no other 
+When the idle animation is used, the named animation will play when no other
 animations are playing. Reference the animation by id.
 
 ```vb
@@ -5635,7 +5735,7 @@ ChromaAnimationAPI.SetIdleAnimation(animationId As Integer)
 <a name="SetIdleAnimationName"></a>
 **SetIdleAnimationName**
 
-When the idle animation is used, the named animation will play when no other 
+When the idle animation is used, the named animation will play when no other
 animations are playing. Reference the animation by name.
 
 ```vb
@@ -5658,7 +5758,7 @@ ChromaAnimationAPI.SetKeyColor(animationId As Integer, frameId As Integer, rzkey
 <a name="SetKeyColorAllFrames"></a>
 **SetKeyColorAllFrames**
 
-Set the key to the specified key color for all frames. Animation is referenced 
+Set the key to the specified key color for all frames. Animation is referenced
 by id.
 
 ```vb
@@ -5670,7 +5770,7 @@ ChromaAnimationAPI.SetKeyColorAllFrames(animationId As Integer, rzkey As Integer
 <a name="SetKeyColorAllFramesName"></a>
 **SetKeyColorAllFramesName**
 
-Set the key to the specified key color for all frames. Animation is referenced 
+Set the key to the specified key color for all frames. Animation is referenced
 by name.
 
 ```vb
@@ -5693,7 +5793,7 @@ Dim result As Double = ChromaAnimationAPI.SetKeyColorAllFramesNameD(path As Stri
 <a name="SetKeyColorAllFramesRGB"></a>
 **SetKeyColorAllFramesRGB**
 
-Set the key to the specified key color for all frames. Animation is referenced 
+Set the key to the specified key color for all frames. Animation is referenced
 by id.
 
 ```vb
@@ -5705,7 +5805,7 @@ ChromaAnimationAPI.SetKeyColorAllFramesRGB(animationId As Integer, rzkey As Inte
 <a name="SetKeyColorAllFramesRGBName"></a>
 **SetKeyColorAllFramesRGBName**
 
-Set the key to the specified key color for all frames. Animation is referenced 
+Set the key to the specified key color for all frames. Animation is referenced
 by name.
 
 ```vb
@@ -5750,7 +5850,7 @@ Dim result As Double = ChromaAnimationAPI.SetKeyColorNameD(path As String, frame
 <a name="SetKeyColorRGB"></a>
 **SetKeyColorRGB**
 
-Set the key to the specified key color for the specified frame. Animation 
+Set the key to the specified key color for the specified frame. Animation
 is referenced by id.
 
 ```vb
@@ -5762,7 +5862,7 @@ ChromaAnimationAPI.SetKeyColorRGB(animationId As Integer, frameId As Integer, rz
 <a name="SetKeyColorRGBName"></a>
 **SetKeyColorRGBName**
 
-Set the key to the specified key color for the specified frame. Animation 
+Set the key to the specified key color for the specified frame. Animation
 is referenced by name.
 
 ```vb
@@ -5785,7 +5885,7 @@ Dim result As Double = ChromaAnimationAPI.SetKeyColorRGBNameD(path As String, fr
 <a name="SetKeyNonZeroColor"></a>
 **SetKeyNonZeroColor**
 
-Set animation key to a static color for the given frame if the existing 
+Set animation key to a static color for the given frame if the existing
 color is not already black.
 
 ```vb
@@ -5797,7 +5897,7 @@ ChromaAnimationAPI.SetKeyNonZeroColor(animationId As Integer, frameId As Integer
 <a name="SetKeyNonZeroColorName"></a>
 **SetKeyNonZeroColorName**
 
-Set animation key to a static color for the given frame if the existing 
+Set animation key to a static color for the given frame if the existing
 color is not already black.
 
 ```vb
@@ -5820,7 +5920,7 @@ Dim result As Double = ChromaAnimationAPI.SetKeyNonZeroColorNameD(path As String
 <a name="SetKeyNonZeroColorRGB"></a>
 **SetKeyNonZeroColorRGB**
 
-Set the key to the specified key color for the specified frame where color 
+Set the key to the specified key color for the specified frame where color
 is not black. Animation is referenced by id.
 
 ```vb
@@ -5832,7 +5932,7 @@ ChromaAnimationAPI.SetKeyNonZeroColorRGB(animationId As Integer, frameId As Inte
 <a name="SetKeyNonZeroColorRGBName"></a>
 **SetKeyNonZeroColorRGBName**
 
-Set the key to the specified key color for the specified frame where color 
+Set the key to the specified key color for the specified frame where color
 is not black. Animation is referenced by name.
 
 ```vb
@@ -5866,7 +5966,7 @@ ChromaAnimationAPI.SetKeyRowColumnColorName(path As String, frameId As Integer, 
 <a name="SetKeysColor"></a>
 **SetKeysColor**
 
-Set an array of animation keys to a static color for the given frame. Animation 
+Set an array of animation keys to a static color for the given frame. Animation
 is referenced by id.
 
 ```vb
@@ -5878,7 +5978,7 @@ ChromaAnimationAPI.SetKeysColor(animationId As Integer, frameId As Integer, rzke
 <a name="SetKeysColorAllFrames"></a>
 **SetKeysColorAllFrames**
 
-Set an array of animation keys to a static color for all frames. Animation 
+Set an array of animation keys to a static color for all frames. Animation
 is referenced by id.
 
 ```vb
@@ -5890,7 +5990,7 @@ ChromaAnimationAPI.SetKeysColorAllFrames(animationId As Integer, rzkeys As Integ
 <a name="SetKeysColorAllFramesName"></a>
 **SetKeysColorAllFramesName**
 
-Set an array of animation keys to a static color for all frames. Animation 
+Set an array of animation keys to a static color for all frames. Animation
 is referenced by name.
 
 ```vb
@@ -5902,7 +6002,7 @@ ChromaAnimationAPI.SetKeysColorAllFramesName(path As String, rzkeys As Integer()
 <a name="SetKeysColorAllFramesRGB"></a>
 **SetKeysColorAllFramesRGB**
 
-Set an array of animation keys to a static color for all frames. Animation 
+Set an array of animation keys to a static color for all frames. Animation
 is referenced by id.
 
 ```vb
@@ -5914,7 +6014,7 @@ ChromaAnimationAPI.SetKeysColorAllFramesRGB(animationId As Integer, rzkeys As In
 <a name="SetKeysColorAllFramesRGBName"></a>
 **SetKeysColorAllFramesRGBName**
 
-Set an array of animation keys to a static color for all frames. Animation 
+Set an array of animation keys to a static color for all frames. Animation
 is referenced by name.
 
 ```vb
@@ -5937,7 +6037,7 @@ ChromaAnimationAPI.SetKeysColorName(path As String, frameId As Integer, rzkeys A
 <a name="SetKeysColorRGB"></a>
 **SetKeysColorRGB**
 
-Set an array of animation keys to a static color for the given frame. Animation 
+Set an array of animation keys to a static color for the given frame. Animation
 is referenced by id.
 
 ```vb
@@ -5949,7 +6049,7 @@ ChromaAnimationAPI.SetKeysColorRGB(animationId As Integer, frameId As Integer, r
 <a name="SetKeysColorRGBName"></a>
 **SetKeysColorRGBName**
 
-Set an array of animation keys to a static color for the given frame. Animation 
+Set an array of animation keys to a static color for the given frame. Animation
 is referenced by name.
 
 ```vb
@@ -5961,7 +6061,7 @@ ChromaAnimationAPI.SetKeysColorRGBName(path As String, frameId As Integer, rzkey
 <a name="SetKeysNonZeroColor"></a>
 **SetKeysNonZeroColor**
 
-Set an array of animation keys to a static color for the given frame if 
+Set an array of animation keys to a static color for the given frame if
 the existing color is not already black.
 
 ```vb
@@ -5973,7 +6073,7 @@ ChromaAnimationAPI.SetKeysNonZeroColor(animationId As Integer, frameId As Intege
 <a name="SetKeysNonZeroColorAllFrames"></a>
 **SetKeysNonZeroColorAllFrames**
 
-Set an array of animation keys to a static color for the given frame where 
+Set an array of animation keys to a static color for the given frame where
 the color is not black. Animation is referenced by id.
 
 ```vb
@@ -5985,7 +6085,7 @@ ChromaAnimationAPI.SetKeysNonZeroColorAllFrames(animationId As Integer, rzkeys A
 <a name="SetKeysNonZeroColorAllFramesName"></a>
 **SetKeysNonZeroColorAllFramesName**
 
-Set an array of animation keys to a static color for all frames if the existing 
+Set an array of animation keys to a static color for all frames if the existing
 color is not already black. Reference animation by name.
 
 ```vb
@@ -5997,7 +6097,7 @@ ChromaAnimationAPI.SetKeysNonZeroColorAllFramesName(path As String, rzkeys As In
 <a name="SetKeysNonZeroColorName"></a>
 **SetKeysNonZeroColorName**
 
-Set an array of animation keys to a static color for the given frame if 
+Set an array of animation keys to a static color for the given frame if
 the existing color is not already black. Reference animation by name.
 
 ```vb
@@ -6009,7 +6109,7 @@ ChromaAnimationAPI.SetKeysNonZeroColorName(path As String, frameId As Integer, r
 <a name="SetKeysNonZeroColorRGB"></a>
 **SetKeysNonZeroColorRGB**
 
-Set an array of animation keys to a static color for the given frame where 
+Set an array of animation keys to a static color for the given frame where
 the color is not black. Animation is referenced by id.
 
 ```vb
@@ -6021,7 +6121,7 @@ ChromaAnimationAPI.SetKeysNonZeroColorRGB(animationId As Integer, frameId As Int
 <a name="SetKeysNonZeroColorRGBName"></a>
 **SetKeysNonZeroColorRGBName**
 
-Set an array of animation keys to a static color for the given frame where 
+Set an array of animation keys to a static color for the given frame where
 the color is not black. Animation is referenced by name.
 
 ```vb
@@ -6033,7 +6133,7 @@ ChromaAnimationAPI.SetKeysNonZeroColorRGBName(path As String, frameId As Integer
 <a name="SetKeysZeroColor"></a>
 **SetKeysZeroColor**
 
-Set an array of animation keys to a static color for the given frame where 
+Set an array of animation keys to a static color for the given frame where
 the color is black. Animation is referenced by id.
 
 ```vb
@@ -6045,7 +6145,7 @@ ChromaAnimationAPI.SetKeysZeroColor(animationId As Integer, frameId As Integer, 
 <a name="SetKeysZeroColorAllFrames"></a>
 **SetKeysZeroColorAllFrames**
 
-Set an array of animation keys to a static color for all frames where the 
+Set an array of animation keys to a static color for all frames where the
 color is black. Animation is referenced by id.
 
 ```vb
@@ -6057,7 +6157,7 @@ ChromaAnimationAPI.SetKeysZeroColorAllFrames(animationId As Integer, rzkeys As I
 <a name="SetKeysZeroColorAllFramesName"></a>
 **SetKeysZeroColorAllFramesName**
 
-Set an array of animation keys to a static color for all frames where the 
+Set an array of animation keys to a static color for all frames where the
 color is black. Animation is referenced by name.
 
 ```vb
@@ -6069,7 +6169,7 @@ ChromaAnimationAPI.SetKeysZeroColorAllFramesName(path As String, rzkeys As Integ
 <a name="SetKeysZeroColorAllFramesRGB"></a>
 **SetKeysZeroColorAllFramesRGB**
 
-Set an array of animation keys to a static color for all frames where the 
+Set an array of animation keys to a static color for all frames where the
 color is black. Animation is referenced by id.
 
 ```vb
@@ -6081,7 +6181,7 @@ ChromaAnimationAPI.SetKeysZeroColorAllFramesRGB(animationId As Integer, rzkeys A
 <a name="SetKeysZeroColorAllFramesRGBName"></a>
 **SetKeysZeroColorAllFramesRGBName**
 
-Set an array of animation keys to a static color for all frames where the 
+Set an array of animation keys to a static color for all frames where the
 color is black. Animation is referenced by name.
 
 ```vb
@@ -6093,7 +6193,7 @@ ChromaAnimationAPI.SetKeysZeroColorAllFramesRGBName(path As String, rzkeys As In
 <a name="SetKeysZeroColorName"></a>
 **SetKeysZeroColorName**
 
-Set an array of animation keys to a static color for the given frame where 
+Set an array of animation keys to a static color for the given frame where
 the color is black. Animation is referenced by name.
 
 ```vb
@@ -6105,7 +6205,7 @@ ChromaAnimationAPI.SetKeysZeroColorName(path As String, frameId As Integer, rzke
 <a name="SetKeysZeroColorRGB"></a>
 **SetKeysZeroColorRGB**
 
-Set an array of animation keys to a static color for the given frame where 
+Set an array of animation keys to a static color for the given frame where
 the color is black. Animation is referenced by id.
 
 ```vb
@@ -6117,7 +6217,7 @@ ChromaAnimationAPI.SetKeysZeroColorRGB(animationId As Integer, frameId As Intege
 <a name="SetKeysZeroColorRGBName"></a>
 **SetKeysZeroColorRGBName**
 
-Set an array of animation keys to a static color for the given frame where 
+Set an array of animation keys to a static color for the given frame where
 the color is black. Animation is referenced by name.
 
 ```vb
@@ -6129,7 +6229,7 @@ ChromaAnimationAPI.SetKeysZeroColorRGBName(path As String, frameId As Integer, r
 <a name="SetKeyZeroColor"></a>
 **SetKeyZeroColor**
 
-Set animation key to a static color for the given frame where the color 
+Set animation key to a static color for the given frame where the color
 is black. Animation is referenced by id.
 
 ```vb
@@ -6141,7 +6241,7 @@ ChromaAnimationAPI.SetKeyZeroColor(animationId As Integer, frameId As Integer, r
 <a name="SetKeyZeroColorName"></a>
 **SetKeyZeroColorName**
 
-Set animation key to a static color for the given frame where the color 
+Set animation key to a static color for the given frame where the color
 is black. Animation is referenced by name.
 
 ```vb
@@ -6164,7 +6264,7 @@ Dim result As Double = ChromaAnimationAPI.SetKeyZeroColorNameD(path As String, f
 <a name="SetKeyZeroColorRGB"></a>
 **SetKeyZeroColorRGB**
 
-Set animation key to a static color for the given frame where the color 
+Set animation key to a static color for the given frame where the color
 is black. Animation is referenced by id.
 
 ```vb
@@ -6176,7 +6276,7 @@ ChromaAnimationAPI.SetKeyZeroColorRGB(animationId As Integer, frameId As Integer
 <a name="SetKeyZeroColorRGBName"></a>
 **SetKeyZeroColorRGBName**
 
-Set animation key to a static color for the given frame where the color 
+Set animation key to a static color for the given frame where the color
 is black. Animation is referenced by name.
 
 ```vb
@@ -6199,8 +6299,8 @@ Dim result As Double = ChromaAnimationAPI.SetKeyZeroColorRGBNameD(path As String
 <a name="SetLogDelegate"></a>
 **SetLogDelegate**
 
-Invokes the setup for a debug logging callback so that `stdout` is redirected 
-to the callback. This is used by `Unity` so that debug messages can appear 
+Invokes the setup for a debug logging callback so that `stdout` is redirected
+to the callback. This is used by `Unity` so that debug messages can appear
 in the console window.
 
 ```vb
@@ -6278,7 +6378,7 @@ ChromaAnimationAPI.StopAll()
 <a name="StopAnimation"></a>
 **StopAnimation**
 
-Stops animation playback if in progress. Returns the animation id upon success. 
+Stops animation playback if in progress. Returns the animation id upon success.
 Returns -1 upon failure.
 
 ```vb
@@ -6301,8 +6401,8 @@ Dim result As Double = ChromaAnimationAPI.StopAnimationD(animationId As Double)
 <a name="StopAnimationName"></a>
 **StopAnimationName**
 
-`PluginStopAnimationName` automatically handles initializing the `ChromaSDK`. 
-The named `.chroma` animation file will be automatically opened. The animation 
+`PluginStopAnimationName` automatically handles initializing the `ChromaSDK`.
+The named `.chroma` animation file will be automatically opened. The animation
 will stop if playing.
 
 ```vb
@@ -6325,8 +6425,8 @@ Dim result As Double = ChromaAnimationAPI.StopAnimationNameD(path As String)
 <a name="StopAnimationType"></a>
 **StopAnimationType**
 
-`PluginStopAnimationType` automatically handles initializing the `ChromaSDK`. 
-If any animation is playing for the `deviceType` and `device` combination, 
+`PluginStopAnimationType` automatically handles initializing the `ChromaSDK`.
+If any animation is playing for the `deviceType` and `device` combination,
 it will be stopped.
 
 ```vb
@@ -6349,8 +6449,8 @@ Dim result As Double = ChromaAnimationAPI.StopAnimationTypeD(deviceType As Doubl
 <a name="StopComposite"></a>
 **StopComposite**
 
-`PluginStopComposite` automatically handles initializing the `ChromaSDK`. 
-The named animation files for the `.chroma` set will be automatically opened. 
+`PluginStopComposite` automatically handles initializing the `ChromaSDK`.
+The named animation files for the `.chroma` set will be automatically opened.
 The set of animations will be stopped if playing.
 
 ```vb
@@ -6384,7 +6484,7 @@ Dim result As Integer = ChromaAnimationAPI.SubtractColor(color1 As Integer, colo
 <a name="SubtractNonZeroAllKeysAllFrames"></a>
 **SubtractNonZeroAllKeysAllFrames**
 
-Subtract the source color from the target color for all frames where the 
+Subtract the source color from the target color for all frames where the
 target color is not black. Source and target are referenced by id.
 
 ```vb
@@ -6396,7 +6496,7 @@ ChromaAnimationAPI.SubtractNonZeroAllKeysAllFrames(sourceAnimationId As Integer,
 <a name="SubtractNonZeroAllKeysAllFramesName"></a>
 **SubtractNonZeroAllKeysAllFramesName**
 
-Subtract the source color from the target color for all frames where the 
+Subtract the source color from the target color for all frames where the
 target color is not black. Source and target are referenced by name.
 
 ```vb
@@ -6419,8 +6519,8 @@ Dim result As Double = ChromaAnimationAPI.SubtractNonZeroAllKeysAllFramesNameD(s
 <a name="SubtractNonZeroAllKeysAllFramesOffset"></a>
 **SubtractNonZeroAllKeysAllFramesOffset**
 
-Subtract the source color from the target color for all frames where the 
-target color is not black starting at offset for the length of the source. 
+Subtract the source color from the target color for all frames where the
+target color is not black starting at offset for the length of the source.
 Source and target are referenced by id.
 
 ```vb
@@ -6432,8 +6532,8 @@ ChromaAnimationAPI.SubtractNonZeroAllKeysAllFramesOffset(sourceAnimationId As In
 <a name="SubtractNonZeroAllKeysAllFramesOffsetName"></a>
 **SubtractNonZeroAllKeysAllFramesOffsetName**
 
-Subtract the source color from the target color for all frames where the 
-target color is not black starting at offset for the length of the source. 
+Subtract the source color from the target color for all frames where the
+target color is not black starting at offset for the length of the source.
 Source and target are referenced by name.
 
 ```vb
@@ -6456,7 +6556,7 @@ Dim result As Double = ChromaAnimationAPI.SubtractNonZeroAllKeysAllFramesOffsetN
 <a name="SubtractNonZeroAllKeysOffset"></a>
 **SubtractNonZeroAllKeysOffset**
 
-Subtract the source color from the target where color is not black for the 
+Subtract the source color from the target where color is not black for the
 source frame and target offset frame, reference source and target by id.
 
 ```vb
@@ -6468,7 +6568,7 @@ ChromaAnimationAPI.SubtractNonZeroAllKeysOffset(sourceAnimationId As Integer, ta
 <a name="SubtractNonZeroAllKeysOffsetName"></a>
 **SubtractNonZeroAllKeysOffsetName**
 
-Subtract the source color from the target where color is not black for the 
+Subtract the source color from the target where color is not black for the
 source frame and target offset frame, reference source and target by name.
 
 ```vb
@@ -6491,7 +6591,7 @@ Dim result As Double = ChromaAnimationAPI.SubtractNonZeroAllKeysOffsetNameD(sour
 <a name="SubtractNonZeroTargetAllKeysAllFrames"></a>
 **SubtractNonZeroTargetAllKeysAllFrames**
 
-Subtract the source color from the target color where the target color is 
+Subtract the source color from the target color where the target color is
 not black for all frames. Reference source and target by id.
 
 ```vb
@@ -6503,7 +6603,7 @@ ChromaAnimationAPI.SubtractNonZeroTargetAllKeysAllFrames(sourceAnimationId As In
 <a name="SubtractNonZeroTargetAllKeysAllFramesName"></a>
 **SubtractNonZeroTargetAllKeysAllFramesName**
 
-Subtract the source color from the target color where the target color is 
+Subtract the source color from the target color where the target color is
 not black for all frames. Reference source and target by name.
 
 ```vb
@@ -6526,8 +6626,8 @@ Dim result As Double = ChromaAnimationAPI.SubtractNonZeroTargetAllKeysAllFramesN
 <a name="SubtractNonZeroTargetAllKeysAllFramesOffset"></a>
 **SubtractNonZeroTargetAllKeysAllFramesOffset**
 
-Subtract the source color from the target color where the target color is 
-not black for all frames starting at the target offset for the length of 
+Subtract the source color from the target color where the target color is
+not black for all frames starting at the target offset for the length of
 the source. Reference source and target by id.
 
 ```vb
@@ -6539,8 +6639,8 @@ ChromaAnimationAPI.SubtractNonZeroTargetAllKeysAllFramesOffset(sourceAnimationId
 <a name="SubtractNonZeroTargetAllKeysAllFramesOffsetName"></a>
 **SubtractNonZeroTargetAllKeysAllFramesOffsetName**
 
-Subtract the source color from the target color where the target color is 
-not black for all frames starting at the target offset for the length of 
+Subtract the source color from the target color where the target color is
+not black for all frames starting at the target offset for the length of
 the source. Reference source and target by name.
 
 ```vb
@@ -6563,8 +6663,8 @@ Dim result As Double = ChromaAnimationAPI.SubtractNonZeroTargetAllKeysAllFramesO
 <a name="SubtractNonZeroTargetAllKeysOffset"></a>
 **SubtractNonZeroTargetAllKeysOffset**
 
-Subtract the source color from the target color where the target color is 
-not black from the source frame to the target offset frame. Reference source 
+Subtract the source color from the target color where the target color is
+not black from the source frame to the target offset frame. Reference source
 and target by id.
 
 ```vb
@@ -6576,8 +6676,8 @@ ChromaAnimationAPI.SubtractNonZeroTargetAllKeysOffset(sourceAnimationId As Integ
 <a name="SubtractNonZeroTargetAllKeysOffsetName"></a>
 **SubtractNonZeroTargetAllKeysOffsetName**
 
-Subtract the source color from the target color where the target color is 
-not black from the source frame to the target offset frame. Reference source 
+Subtract the source color from the target color where the target color is
+not black from the source frame to the target offset frame. Reference source
 and target by name.
 
 ```vb
@@ -6600,8 +6700,8 @@ Dim result As Double = ChromaAnimationAPI.SubtractNonZeroTargetAllKeysOffsetName
 <a name="SubtractThresholdColorsMinMaxAllFramesRGB"></a>
 **SubtractThresholdColorsMinMaxAllFramesRGB**
 
-Subtract all frames with the min RGB color where the animation color is 
-less than the min threshold AND with the max RGB color where the animation 
+Subtract all frames with the min RGB color where the animation color is
+less than the min threshold AND with the max RGB color where the animation
 is more than the max threshold. Animation is referenced by id.
 
 ```vb
@@ -6613,8 +6713,8 @@ ChromaAnimationAPI.SubtractThresholdColorsMinMaxAllFramesRGB(animationId As Inte
 <a name="SubtractThresholdColorsMinMaxAllFramesRGBName"></a>
 **SubtractThresholdColorsMinMaxAllFramesRGBName**
 
-Subtract all frames with the min RGB color where the animation color is 
-less than the min threshold AND with the max RGB color where the animation 
+Subtract all frames with the min RGB color where the animation color is
+less than the min threshold AND with the max RGB color where the animation
 is more than the max threshold. Animation is referenced by name.
 
 ```vb
@@ -6637,8 +6737,8 @@ Dim result As Double = ChromaAnimationAPI.SubtractThresholdColorsMinMaxAllFrames
 <a name="SubtractThresholdColorsMinMaxRGB"></a>
 **SubtractThresholdColorsMinMaxRGB**
 
-Subtract the specified frame with the min RGB color where the animation 
-color is less than the min threshold AND with the max RGB color where the 
+Subtract the specified frame with the min RGB color where the animation
+color is less than the min threshold AND with the max RGB color where the
 animation is more than the max threshold. Animation is referenced by id.
 
 ```vb
@@ -6650,8 +6750,8 @@ ChromaAnimationAPI.SubtractThresholdColorsMinMaxRGB(animationId As Integer, fram
 <a name="SubtractThresholdColorsMinMaxRGBName"></a>
 **SubtractThresholdColorsMinMaxRGBName**
 
-Subtract the specified frame with the min RGB color where the animation 
-color is less than the min threshold AND with the max RGB color where the 
+Subtract the specified frame with the min RGB color where the animation
+color is less than the min threshold AND with the max RGB color where the
 animation is more than the max threshold. Animation is referenced by name.
 
 ```vb
@@ -6674,8 +6774,9 @@ Dim result As Double = ChromaAnimationAPI.SubtractThresholdColorsMinMaxRGBNameD(
 <a name="TrimEndFrames"></a>
 **TrimEndFrames**
 
-Trim the end of the animation. The length of the animation will be the lastFrameId 
-+ 1. Reference the animation by id.
+Trim the end of the animation. The length of the animation will be the lastFrameId
+
+* 1. Reference the animation by id.
 
 ```vb
 ChromaAnimationAPI.TrimEndFrames(animationId As Integer, lastFrameId As Integer)
@@ -6686,8 +6787,9 @@ ChromaAnimationAPI.TrimEndFrames(animationId As Integer, lastFrameId As Integer)
 <a name="TrimEndFramesName"></a>
 **TrimEndFramesName**
 
-Trim the end of the animation. The length of the animation will be the lastFrameId 
-+ 1. Reference the animation by name.
+Trim the end of the animation. The length of the animation will be the lastFrameId
+
+* 1. Reference the animation by name.
 
 ```vb
 ChromaAnimationAPI.TrimEndFramesName(path As String, lastFrameId As Integer)
@@ -6742,7 +6844,7 @@ Dim result As Double = ChromaAnimationAPI.TrimFrameNameD(path As String, frameId
 <a name="TrimStartFrames"></a>
 **TrimStartFrames**
 
-Trim the start of the animation starting at frame 0 for the number of frames. 
+Trim the start of the animation starting at frame 0 for the number of frames.
 Reference the animation by id.
 
 ```vb
@@ -6754,7 +6856,7 @@ ChromaAnimationAPI.TrimStartFrames(animationId As Integer, numberOfFrames As Int
 <a name="TrimStartFramesName"></a>
 **TrimStartFramesName**
 
-Trim the start of the animation starting at frame 0 for the number of frames. 
+Trim the start of the animation starting at frame 0 for the number of frames.
 Reference the animation by name.
 
 ```vb
@@ -6799,7 +6901,7 @@ Dim result As Double = ChromaAnimationAPI.UninitD()
 <a name="UnloadAnimation"></a>
 **UnloadAnimation**
 
-Unloads `Chroma` effects to free up resources. Returns the animation id 
+Unloads `Chroma` effects to free up resources. Returns the animation id
 upon success. Returns -1 upon failure. Reference the animation by id.
 
 ```vb
@@ -6833,7 +6935,7 @@ ChromaAnimationAPI.UnloadAnimationName(path As String)
 <a name="UnloadComposite"></a>
 **UnloadComposite**
 
-Unload the the composite set of animation effects. Reference the animation 
+Unload the the composite set of animation effects. Reference the animation
 by name.
 
 ```vb
@@ -6867,12 +6969,13 @@ ChromaAnimationAPI.UnloadLibraryStreamingPlugin()
 <a name="UpdateFrame"></a>
 **UpdateFrame**
 
-Updates the `frameIndex` of the `Chroma` animation and sets the `duration` 
-(in seconds). The `color` is expected to be an array of the dimensions 
-for the `deviceType/device`. The `length` parameter is the size of the 
-`color` array. For `EChromaSDKDevice1DEnum` the array size should be `MAX 
-LEDS`. For `EChromaSDKDevice2DEnum` the array size should be `MAX ROW` 
-* `MAX COLUMN`. Returns the animation id upon success. Returns -1 upon 
+Updates the `frameIndex` of the `Chroma` animation and sets the `duration`
+(in seconds). The `color` is expected to be an array of the dimensions
+for the `deviceType/device`. The `length` parameter is the size of the
+`color` array. For `EChromaSDKDevice1DEnum` the array size should be `MAX
+LEDS`. For `EChromaSDKDevice2DEnum` the array size should be `MAX ROW`
+
+* `MAX COLUMN`. Returns the animation id upon success. Returns -1 upon
 failure.
 
 ```vb
@@ -6884,12 +6987,13 @@ Dim result As Integer = ChromaAnimationAPI.UpdateFrame(animationId As Integer, f
 <a name="UpdateFrameName"></a>
 **UpdateFrameName**
 
-Updates the `frameIndex` of the `Chroma` animation and sets the `duration` 
-(in seconds). The `color` is expected to be an array of the dimensions 
-for the `deviceType/device`. The `length` parameter is the size of the 
-`color` array. For `EChromaSDKDevice1DEnum` the array size should be `MAX 
-LEDS`. For `EChromaSDKDevice2DEnum` the array size should be `MAX ROW` 
-* `MAX COLUMN`. Returns the animation id upon success. Returns -1 upon 
+Updates the `frameIndex` of the `Chroma` animation and sets the `duration`
+(in seconds). The `color` is expected to be an array of the dimensions
+for the `deviceType/device`. The `length` parameter is the size of the
+`color` array. For `EChromaSDKDevice1DEnum` the array size should be `MAX
+LEDS`. For `EChromaSDKDevice2DEnum` the array size should be `MAX ROW`
+
+* `MAX COLUMN`. Returns the animation id upon success. Returns -1 upon
 failure.
 
 ```vb
@@ -6901,10 +7005,10 @@ Dim result As Integer = ChromaAnimationAPI.UpdateFrameName(path As String, frame
 <a name="UseIdleAnimation"></a>
 **UseIdleAnimation**
 
-When the idle animation flag is true, when no other animations are playing, 
-the idle animation will be used. The idle animation will not be affected 
-by the API calls to PluginIsPlaying, PluginStopAnimationType, PluginGetPlayingAnimationId, 
-and PluginGetPlayingAnimationCount. Then the idle animation flag is false, 
+When the idle animation flag is true, when no other animations are playing,
+the idle animation will be used. The idle animation will not be affected
+by the API calls to PluginIsPlaying, PluginStopAnimationType, PluginGetPlayingAnimationId,
+and PluginGetPlayingAnimationCount. Then the idle animation flag is false,
 the idle animation is disabled. `Device` uses `EChromaSDKDeviceEnum` enums.
 
 ```vb
@@ -6927,7 +7031,7 @@ ChromaAnimationAPI.UseIdleAnimations(flag As Boolean)
 <a name="UsePreloading"></a>
 **UsePreloading**
 
-Set preloading animation flag, which is set to true by default. Reference 
+Set preloading animation flag, which is set to true by default. Reference
 animation by id.
 
 ```vb
@@ -6939,7 +7043,7 @@ ChromaAnimationAPI.UsePreloading(animationId As Integer, flag As Boolean)
 <a name="UsePreloadingName"></a>
 **UsePreloadingName**
 
-Set preloading animation flag, which is set to true by default. Reference 
+Set preloading animation flag, which is set to true by default. Reference
 animation by name.
 
 ```vb
